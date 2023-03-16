@@ -1,0 +1,16 @@
+matrix = fill([0,1],3)
+println("Original matrix defined with fill(): ")
+println(matrix)
+println(" Are all elements of matrix at the same address? ",matrix[1] === matrix[2]===matrix[3])
+println()
+matrix[1] = [0,1] # re-binding
+println("Matrix with the 1st element rebound: ")
+println(matrix)
+println(" Is the 1st element still has the same underlying array as others? ",matrix[1] === matrix[2])
+println(" Are the 2nd and the 3rd elements have the same underlying array? ",matrix[3] === matrix[2])
+println()
+matrix[2] .= [10,20] # mutating
+println("Matrix with the 2nd element mutated: ")
+println(matrix)
+println(" Is the 1st element still has the same underlying array as others? ",matrix[1] === matrix[2])
+println(" Are the 2nd and the 3rd elements have the same underlying array? ",matrix[3] === matrix[2])
