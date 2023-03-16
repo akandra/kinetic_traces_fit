@@ -1,8 +1,12 @@
 module m
 
-    function hello(name)
-   
-        println(name)
-    end
+# export hello
+
+function hello(name)
+
+    println(name)
+    # print("ok")
+end
+
 end
 

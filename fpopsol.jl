@@ -782,7 +782,7 @@ end;
 # ==========================================================================
 
 # set paths to the data and results folders
-path         = "../../Kinetics of Surface Reactions/"
+path         = "../../Dropbox/Kinetics of Surface Reactions/"
 data_path    = path * "data/"
 results_path = path * "results/" * "nu3_1/"
 
