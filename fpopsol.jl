@@ -9,32 +9,12 @@ using Plots
 # using LaTeXStrings
 # using FiniteDiff
 
-# structure to deal with fitting parameters
-@with_kw mutable struct fitpar
-
-    value::Float64 = 0.0
-    min::Float64   = -Inf
-    max::Float64   = Inf
-    var::Bool      = false
-    glbl::Bool     = false
-
-end
 
 function ann_par(name, p::fitpar) 
     # s = latexstring(name,L"=",string(round(p.value,sigdigits=3)))
     s = "\$"*name*" = "*string(round(p.value,sigdigits=3))*"\$"
     #s = @sprintf "\$ %.2f \\cdot 10^1\$" significand(p.value)#*2.0^exponent(p.value)
     text(s,:left, p.var ? :black : :gray)
-end
-
-function get_data(data_path, filenames)::Vector{Matrix{Float64}}
-
-    data = Vector{Matrix{Float64}}
-    data= []
-    for f in filenames
-        push!(data, readdlm(data_path * f, Float64, comments=true))
-    end
-    return data
 end
 
 """
@@ -168,20 +148,6 @@ function H2Pulse(t::Float64, a::Vector{Float64}, fwhm::Vector{Float64}, tcenter:
     end
 
     return gausses
-end
-
-function get_beampars(fnames)
-# ALARM!!!!! Fix me
-return  [
-    [[0.000120897, 0.000170694, 0.000105154],   [30.3872, 15.1266, 75.293],  [51.9994, 52.4238, 85.3074]], 
-    [[0.0000148181, 0.000212279, 0.000128483],  [14.8624, 18.5067, 68.9036], [35.5675, 52.2248, 72.4033]], 
-    [[0.000256086, 0.0000951222, 0.000241312],  [22.4236, 12.2085, 65.8626], [47.6367, 49.1664, 71.6434]], 
-    # the weird 4th beam is replaced by the regular 6th beam
-    # [[0.0000402161, 0.000242335, 0.000130398],  [11.7742, 20.1696, 177.909], [82.8323, 97.182, 96.105]], 
-    [[0.0000754665, 0.0000707978, 0.000257094], [196.966, 16.4958, 25.2458], [156.164, 100.393, 111.913]],
-    [[0.0000645202, 0.000256638, 0.0000599968], [11.6545, 22.2035, 52.3407], [100.279, 112.345, 123.511]], 
-    [[0.0000754665, 0.0000707978, 0.000257094], [196.966, 16.4958, 25.2458], [156.164, 100.393, 111.913]]
-        ]
 end
 
 function eqns!(ydot,y,p,t, beampars, geompars)
@@ -717,77 +683,9 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
 
 end;
 
-function create_df(data_path)
-
-    datafilenames = readdir(data_path)
-    beamfnames      = filter(x-> occursin("beam",x) ,datafilenames)
-    Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
-    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)
-
-    # create kinetic traces data frame
-    tags =[ map( f->split( splitext(f)[1], "-")[i], kintracesfnames ) for i in 1:5 ]
-    df = DataFrame(tags, [:tag,:facet,:temperature,:rrH2,:rrO2])
-    df[!,:temperature] = parse.(Float64,df[!,:temperature])
-    df[!,:rrH2] = parse.(Float64,df[!,:rrH2])
-    df[!,:rrO2] = parse.(Float64,df[!,:rrO2])
-    df[!,:rrr]  = df[!,:rrO2] ./ df[!,:rrH2]
-    df[!,:ktfname] = kintracesfnames
-    df[!,:beamfname] = tags[1] .* "-beam.dat"
-
-    # create H2-pulse data frame
-    dfbeam = DataFrame( beamfname = beamfnames, beampars = get_beampars(beamfnames) )
-    df = innerjoin(df,dfbeam, on=:beamfname)
-
-    # create geometry parameters data frame
-    dfgeom = DataFrame( facet = String[], geompars = Vector{Float64}[] )
-    push!(dfgeom, ( "332", [1.0/6.0, 2, 1, 1, 1]) )
-    push!(dfgeom, ( "111", [  0.005, 2, 1, 1, 1]) )
-    df = innerjoin(df,dfgeom, on=:facet)
-
-    # create [O]_ini data frame
-    Oinidata = get_data(data_path, Oinifnames)
-    tagsOini = map( f->split( splitext(f)[1], "-")[1], Oinifnames )
-    tags1 = vcat(fill.(tagsOini,size.(Oinidata,1))...)
-    dfOini = DataFrame(vcat(Oinidata...),[:temperature,:rrH2,:rrO2,:Oini])
-    dfOini[!,:tag] = tags1
-    # join above data frames
-    df = innerjoin(df, dfOini, on = [:tag, :temperature, :rrH2, :rrO2])
-
-    # set the names for fit parameter columns
-    fitparsnames = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5",
-                     "a", "t0", "baseline", "f_tr", "k_vac" ]
-    # we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
-    [ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
-
-    return df
-
-end;
-
-function load_kinetic_traces(df2fit)
-
-    println("Loading Kinetic Traces...")
-    [ println(" ",filename) for filename in df2fit.ktfname ]
-    kinetic_traces = get_data(data_path, df2fit.ktfname)
-    ndata = length(kinetic_traces)
-    maxs = [ findmax(kt[:,2]) for kt in kinetic_traces ]
-    mins = [ findmin(kinetic_traces[i][1:maxs[i][2],2]) for i in 1:ndata ]
-    δs   = [ maxs[i][1] - mins[i][1] for i=1:ndata ]
-
-    return kinetic_traces, maxs, mins, δs
-
-end;
-
 # ==========================================================================
 # Main part
 # ==========================================================================
-
-# set paths to the data and results folders
-path         = "../../Dropbox/Kinetics of Surface Reactions/"
-data_path    = path * "data/"
-results_path = path * "results/" * "nu3_1/"
-
-# create dataframe
-df = create_df(data_path)
 
 # select kinetic trace data to fit
 ktfnames = [
