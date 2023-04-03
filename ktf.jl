@@ -1,13 +1,8 @@
-using DataFrames
 using BenchmarkTools
 
-
-include("mod_df.jl")
-using .DFrame
-include("mod_io.jl")
-using .io
-include("mod_ini.jl")
-using .Ini
+include("mod_ksr.jl")
+using .Kinetics_of_Surface_Reactions
+const ksr = Kinetics_of_Surface_Reactions
 
 
 # set paths to the data and results folders
@@ -17,7 +12,7 @@ data_path    = path * "data/"
 results_path = path * "results/" * "nu3_1/"
 
 # create dataframe
-df = DFrame.create_df(data_path)
+df = ksr.create_df(data_path)
 
 # select kinetic trace data to fit
 ktfnames = [
@@ -38,10 +33,10 @@ condition = df.ktfname .∈ [ktfnames[4:6]]
 #condition = 55:55
 
 df2fit = df[condition,:]
-ndata = nrow(df2fit)
+ndata = ksr.nrow(df2fit)
 
 # load kinetic traces
-kinetic_traces, maxs, mins, δs = io.load_kinetic_traces(df2fit,data_path)
+kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 
 # initial guesses for the Arrhenius parameters cooked by Theo
 ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
@@ -66,12 +61,12 @@ if fit_is_local
     # -------------------------------------------------------------------------------
     
         # rates
-        Ini.ini_guess!(df2fit, "1", ν_theoguess[1], false, false, ϵ_theoguess[1])
-        Ini.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2])
-        Ini.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3])
-        Ini.ini_guess!(df2fit, "3", ν_theoguess[4],  true, false, ϵ_theoguess[4])
-        Ini.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5])
-        Ini.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6])
+        ksr.ini_guess!(df2fit, "1", ν_theoguess[1], false, false, ϵ_theoguess[1])
+        ksr.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2])
+        ksr.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3])
+        ksr.ini_guess!(df2fit, "3", ν_theoguess[4],  true, false, ϵ_theoguess[4])
+        ksr.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5])
+        ksr.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6])
     
         # amplitudes, t_0 etc.
         for i=1:ndata
@@ -102,13 +97,13 @@ if fit_is_local
     # -------------------------------------------------------------------------------
     
         # prefactors and activation energies
-        Ini.ini_guess!(df2fit, "1", ν_theoguess[1], false, false, ϵ_theoguess[1], false, false)
-        Ini.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2], false, false)
-        Ini.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3], false, false)
-        Ini.ini_guess!(df2fit, "3", ν_theoguess[4],  true,  true, ϵ_theoguess[4],  true,  true)
-        Ini.ini_guess!(df2fit, "3", 4.4204050640348025e7,  true,  true, 0.5327034287892817,  true,  true)
-        Ini.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5], false, false)
-        Ini.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6], false, false)
+        ksr.ini_guess!(df2fit, "1", ν_theoguess[1], false, false, ϵ_theoguess[1], false, false)
+        ksr.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2], false, false)
+        ksr.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3], false, false)
+        ksr.ini_guess!(df2fit, "3", ν_theoguess[4],  true,  true, ϵ_theoguess[4],  true,  true)
+        ksr.ini_guess!(df2fit, "3", 4.4204050640348025e7,  true,  true, 0.5327034287892817,  true,  true)
+        ksr.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5], false, false)
+        ksr.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6], false, false)
     
         # amplitudes, t_0s etc.
         for i=1:ndata
@@ -172,13 +167,16 @@ if fit_is_local
     df2fit[!,:cutoff] = cutoff
     
     # select df columns of type fitpar
-    df2fitpar = df2fit[!,names(df2fit,fitpar)]
+    df2fitpar = df2fit[!,names(df2fit,ksr.fitpar)]
     # save initial guesses
-    iguess = zeros(ndata, ncol(df2fitpar))
+    iguess = zeros(ndata, ksr.ncol(df2fitpar))
     for i in 1:ndata
-        for j in 1:ncol(df2fitpar)
+        for j in 1:ksr.ncol(df2fitpar)
             iguess[i,j] = df2fitpar[i,j].value
         end
     end
     
     
+# Consider for the future development
+#
+# 1. Put all references to the df into the ksr-module

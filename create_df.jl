@@ -16,7 +16,7 @@ function create_df(data_path)
     df[!,:beamfname] = tags[1] .* "-beam.dat"
 
     # create H2-pulse data frame
-    dfbeam = DataFrame( beamfname = beamfnames, beampars = io.get_beampars(beamfnames) )
+    dfbeam = DataFrame( beamfname = beamfnames, beampars = get_beampars(beamfnames) )
     df = innerjoin(df,dfbeam, on=:beamfname)
 
     # create geometry parameters data frame
@@ -26,7 +26,7 @@ function create_df(data_path)
     df = innerjoin(df,dfgeom, on=:facet)
 
     # create [O]_ini data frame
-    Oinidata = io.get_data(data_path, Oinifnames)
+    Oinidata = get_data(data_path, Oinifnames)
     tagsOini = map( f->split( splitext(f)[1], "-")[1], Oinifnames )
     tags1 = vcat(fill.(tagsOini,size.(Oinidata,1))...)
     dfOini = DataFrame(vcat(Oinidata...),[:temperature,:rrH2,:rrO2,:Oini])
@@ -38,7 +38,7 @@ function create_df(data_path)
     fitparsnames = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5",
                      "a", "t0", "baseline", "f_tr", "k_vac" ]
     # we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
-    [ df[!,n] = [Structs.fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
+    [ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
 
     return df
 
