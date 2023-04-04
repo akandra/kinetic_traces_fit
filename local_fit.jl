@@ -100,7 +100,7 @@ function local_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess;
         display(plot( kinetic_traces[i][:,1], [kinetic_traces[i][:,2], yfit1, [df2fit1.baseline[1].value],[xdata1[df2fit1[1,:cutoff]]]],
                     seriestype=[:scatter :line :hline :vline], framestyle=:box, label=["data" "fit" "baseline" "cutoff"],
                     xlabel="time (μs)", ylabel="H₂O flux (a.u.)", 
-                    title="#"*string(findfirst(df.ktfname .== df2fit[i,:].ktfname))*": "*facet*", "*tsurf*", "*rrr,
+                    title="#"*string(findfirst(df2fit1.ktfname .== df2fit[i,:].ktfname))*": "*facet*", "*tsurf*", "*rrr,
                     size=(600,600),
                     ann=[((0.7,0.80),ann_par("\\kappa_1",  df2fit[:,:ν1  ][i])),
                         ((0.7,0.75),ann_par("\\kappa_{-1}",df2fit[:,:νm1 ][i])),

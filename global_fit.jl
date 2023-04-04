@@ -176,7 +176,7 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
                 plot(d[:,1], [d[:,2], yfit[icounter[1]:icounter[1]+size(d,1)-1]],
                 seriestype=[:scatter :line], framestyle=:box, label=["data" "global fit"],
                 xlabel="time (μs)", ylabel="H₂O flux (a.u.)", 
-                title="#"*string(findfirst(df.ktfname .== df2fit[i,:].ktfname))
+                title="#"*string(i)#string(findfirst(df.ktfname .== df2fit[i,:].ktfname))
                  )
             )
         icounter[1] = icounter[1] + size(d,1)
@@ -191,4 +191,4 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
         display( plot!(plots[p:p+nslots-1]..., layout = page_layout, size=(1200,900)) )
     end
 
-end;
+end
