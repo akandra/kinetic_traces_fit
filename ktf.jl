@@ -1,8 +1,7 @@
-using BenchmarkTools
+using Statistics: mean
 
 include("mod_ksr.jl")
-using .Kinetics_of_Surface_Reactions
-const ksr = Kinetics_of_Surface_Reactions
+import .Kinetics_of_Surface_Reactions as ksr
 
 
 # set paths to the data and results folders
