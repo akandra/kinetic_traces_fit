@@ -1,3 +1,28 @@
+"""
+Returns a vector of product fluxes calculated from a kinetic model
+
+flux_vector(x, p, df2fit, df2fitpar, data, ndata, flg)
+
+x is dummy argument for curve_fit function !!! Consider to get rid of it
+
+p is a vector of fitting parameters
+
+df2fit::DataFrame contains all info, see function create_df for details
+
+df2fitpar::DatFrame a view of df with fitting parameters info
+
+kt::Vector{Array} contains measured kinetic traces [dataset_index] 
+                  with time(μs) in the 1st column and the signal in the 2nd one
+
+path::String path to the output folders
+
+iguess::Array initial guess for fitting parameters
+
+wtd::Tuple{String} tells what to do: (action, selectors, ...) 
+                    where action can be either "fit" or "analysis, and
+                    selectors defines grouping (can be empty)
+
+"""
 function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
 
     flg[1] += 1

@@ -186,7 +186,12 @@ else # fit each dataset separately
                   wtd = what_to_do, max_T_fit = T_cutoff)
 end
 
-    
+NEXTTIME: adjust the kt files and the df to our new understanding the things    
 # Consider for the future development
 #
 # 1. Put all references to the df into the ksr-module
+# 2. Change the way how the kinetic traces files are named and supplied with ancillary info.
+#    Consider 3 ways of doing that:
+#        - create a single ancillary file
+#        - create an ancillary file for each kt file
+#        - put ancillary information as a header into a kt file
