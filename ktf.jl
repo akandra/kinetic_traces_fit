@@ -186,7 +186,7 @@ else # fit each dataset separately
                   wtd = what_to_do, max_T_fit = T_cutoff)
 end
 
-NEXTTIME: adjust the kt files and the df to our new understanding the things    
+#NEXTTIME: adjust the kt files and the df to our new understanding the things    
 # Consider for the future development
 #
 # 1. Put all references to the df into the ksr-module

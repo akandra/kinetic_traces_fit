@@ -3,14 +3,17 @@ function create_df(data_path)
     datafilenames = readdir(data_path)
     beamfnames      = filter(x-> occursin("beam",x) ,datafilenames)
     Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
-    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)
+    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)[8:12] # Warning: don't forget to remove selection
 
     # create kinetic traces data frame
     tags =[ map( f->split( splitext(f)[1], "-")[i], kintracesfnames ) for i in 1:5 ]
-    df = DataFrame(tags, [:tag,:facet,:temperature,:rrH2,:rrO2])
+    df = DataFrame(tags[1:3], [:tag,:facet,:temperature])
     df[!,:temperature] = parse.(Float64,df[!,:temperature])
-    df[!,:rrH2] = parse.(Float64,df[!,:rrH2])
-    df[!,:rrO2] = parse.(Float64,df[!,:rrO2])
+    df[!,:reprates] = [ parse.(Float64,[tags[4][i],tags[5][i]]) for i in 1:length(tags[4]) ]
+
+    println(df)
+    stop
+
     df[!,:rrr]  = df[!,:rrO2] ./ df[!,:rrH2]
     df[!,:ktfname] = kintracesfnames
     df[!,:beamfname] = tags[1] .* "-beam.dat"
