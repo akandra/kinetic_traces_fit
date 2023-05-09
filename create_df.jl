@@ -3,20 +3,24 @@ function create_df(data_path)
     datafilenames = readdir(data_path)
     beamfnames      = filter(x-> occursin("beam",x) ,datafilenames)
     Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
-    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)[8:12] # Warning: don't forget to remove selection
+    # Warning: don't forget to remove selection
+    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)[8:12]
 
     # create kinetic traces data frame
+    # Warning:  after changing the storing of the tag information
+    #           do not forget to make the corresponding adjustments in the following code
     tags =[ map( f->split( splitext(f)[1], "-")[i], kintracesfnames ) for i in 1:5 ]
-    df = DataFrame(tags[1:3], [:tag,:facet,:temperature])
+    df = DataFrame(tags, [:tag,:facet,:temperature,:rr_pump,:rr_cov])
     df[!,:temperature] = parse.(Float64,df[!,:temperature])
-    df[!,:reprates] = [ parse.(Float64,[tags[4][i],tags[5][i]]) for i in 1:length(tags[4]) ]
-
-    println(df)
-    stop
-
-    df[!,:rrr]  = df[!,:rrO2] ./ df[!,:rrH2]
+    df[!,:rr_pump] = parse.(Float64,df[!,:rr_pump])
+    df[!,:rr_cov] = parse.(Float64,df[!,:rr_cov])
+    df[!,:rrr] = df.rr_cov / df.rr_pump
     df[!,:ktfname] = kintracesfnames
     df[!,:beamfname] = tags[1] .* "-beam.dat"
+
+    display(df)
+    stop
+
 
     # create H2-pulse data frame
     dfbeam = DataFrame( beamfname = beamfnames, beampars = get_beampars(beamfnames) )
