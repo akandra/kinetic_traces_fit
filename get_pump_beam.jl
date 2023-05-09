@@ -1,4 +1,4 @@
-function get_beampars(fnames)
+function get_pump_beam(fnames)
     # ALARM!!!!! Fix me
     return  [
         [[0.000120897, 0.000170694, 0.000105154],   [30.3872, 15.1266, 75.293],  [51.9994, 52.4238, 85.3074]], 

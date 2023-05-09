@@ -1,10 +1,10 @@
 function create_df(data_path)
 
-    datafilenames = readdir(data_path)
-    beamfnames      = filter(x-> occursin("beam",x) ,datafilenames)
-    Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
     # Warning: don't forget to remove selection
-    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)[8:12]
+    datafilenames = readdir(data_path)
+    pumpfnames      = filter(x-> occursin("beam",x) ,datafilenames)
+    Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
+    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)
 
     # create kinetic traces data frame
     # Warning:  after changing the storing of the tag information
@@ -14,23 +14,14 @@ function create_df(data_path)
     df[!,:temperature] = parse.(Float64,df[!,:temperature])
     df[!,:rr_pump] = parse.(Float64,df[!,:rr_pump])
     df[!,:rr_cov] = parse.(Float64,df[!,:rr_cov])
-    df[!,:rrr] = df.rr_cov / df.rr_pump
+    df[!,:rrr] = df.rr_cov ./ df.rr_pump
+
     df[!,:ktfname] = kintracesfnames
-    df[!,:beamfname] = tags[1] .* "-beam.dat"
+    df[!,:pump_file] = tags[1] .* "-beam.dat"
 
-    display(df)
-    stop
-
-
-    # create H2-pulse data frame
-    dfbeam = DataFrame( beamfname = beamfnames, beampars = get_beampars(beamfnames) )
-    df = innerjoin(df,dfbeam, on=:beamfname)
-
-    # create geometry parameters data frame
-    dfgeom = DataFrame( facet = String[], geompars = Vector{Float64}[] )
-    push!(dfgeom, ( "332", [1.0/6.0, 2, 1, 1, 1]) )
-    push!(dfgeom, ( "111", [  0.005, 2, 1, 1, 1]) )
-    df = innerjoin(df,dfgeom, on=:facet)
+    # create pump-pulse data frame
+    dfpump = DataFrame( pump_file = pumpfnames, pumppars = get_pump_beam(pumpfnames) )
+    df = innerjoin(df,dfpump, on=:pump_file)
 
     # create [O]_ini data frame
     Oinidata = get_data(data_path, Oinifnames)
@@ -40,6 +31,15 @@ function create_df(data_path)
     dfOini[!,:tag] = tags1
     # join above data frames
     df = innerjoin(df, dfOini, on = [:tag, :temperature, :rrH2, :rrO2])
+
+    display(df)
+    stop
+
+    # create geometry parameters data frame
+    dfgeom = DataFrame( facet = String[], geompars = Vector{Float64}[] )
+    push!(dfgeom, ( "332", [1.0/6.0, 2, 1, 1, 1]) )
+    push!(dfgeom, ( "111", [  0.005, 2, 1, 1, 1]) )
+    df = innerjoin(df,dfgeom, on=:facet)
 
     # set the names for fit parameter columns
     fitparsnames = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5",

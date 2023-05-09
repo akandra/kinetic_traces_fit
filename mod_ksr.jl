@@ -19,7 +19,7 @@ using Plots
 end
 
 # in/out functions
-include("get_beampars.jl")
+include("get_pump_beam.jl")
 include("get_data.jl")
 include("load_kinetic_traces.jl")
 
