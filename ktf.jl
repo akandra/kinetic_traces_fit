@@ -3,15 +3,24 @@ using Statistics: mean
 include("mod_ksr.jl")
 import .Kinetics_of_Surface_Reactions as ksr
 
-
-# set paths to the data and results folders
+# set paths to the data, models and results folders
 path         = "../../Dropbox/Kinetics of Surface Reactions/"
-data_path = 
+
 data_path    = path * "data/"
+model_path   = path * "models/"
 results_path = path * "results/" * "nu3_1/"
 
+# Julia code containing a kinetic model
+model_file = "Theos_All_Step_Model.jl"
+
+# tag delimiter in file names
+delim    = "-"
+# set suffices for beam file names
+pump_sfx = "beam"
+cov_sfx  = "Oini"
+
 # create dataframe
-df = ksr.create_df(data_path)
+df = ksr.create_df(data_path, delim, pump_sfx, cov_sfx)
 
 # select kinetic trace data to fit
 ktfnames = [
@@ -23,7 +32,7 @@ ktfnames = [
             "20201117-111-473-25-50.dat"
            ]
 
-condition = df.ktfname .∈ [ktfnames[4:6]]
+condition = df.ktfname .∈ [ktfnames[1:6]]
 #df2fit = filter( :ktfname => in(ktfnames),df)
 #condition = (df.rrr .== 2) # .| (df.rrr .== 8.0)
 #condition = (df.tag .!= "20201103") .| (df.tag .!= "20201118") 
@@ -37,10 +46,6 @@ ndata = ksr.nrow(df2fit)
 # load kinetic traces
 kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 
-# initial guesses for the Arrhenius parameters cooked by Theo
-ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
-ϵ_theoguess = [ 0.2, 2.0, 0.4, 0.36, 0.75, 0.5 ] # eV
-
 # Set what is to be done
 # fit_is_local = true or false
 # what_to_do   = "fit" or "analysis"
@@ -49,6 +54,11 @@ fit_is_local = true
 what_to_do = ("fit",      "rrr", "facet", "tag")
 what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
+
+
+# initial guesses for the Arrhenius parameters cooked by Theo
+ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
+ϵ_theoguess = [ 0.2, 2.0, 0.4, 0.36, 0.75, 0.5 ] # eV
 
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
@@ -174,6 +184,12 @@ if fit_is_local
             iguess[i,j] = df2fitpar[i,j].value
         end
     end
+
+# create geometry parameters data frame
+dfgeom = DataFrame( facet = String[], geompars = Vector{Float64}[] )
+push!(dfgeom, ( "332", [1.0/6.0, 2, 1, 1, 1]) )
+push!(dfgeom, ( "111", [  0.005, 2, 1, 1, 1]) )
+#df = innerjoin(df,dfgeom, on=:facet)
 
 # if any parameter is global then do a fit to all the data simultaneously
 # dataset 1 is chosen, since all .glbl's are the same

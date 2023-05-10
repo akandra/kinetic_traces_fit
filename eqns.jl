@@ -1,3 +1,10 @@
+# set the names for fit parameter columns
+fitparsnames = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5",
+                    "a", "t0", "baseline", "f_tr", "k_vac" ]
+# we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
+#[ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
+
+
 function eqns!(ydot,y,p,t, beampars, geompars)
 
     # All-step model from Theo (everything occurs on steps)
