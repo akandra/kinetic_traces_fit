@@ -3,15 +3,20 @@ using Statistics: mean
 include("mod_ksr.jl")
 import .Kinetics_of_Surface_Reactions as ksr
 
-# set paths to the data, models and results folders
-path         = "../../Dropbox/Kinetics of Surface Reactions/"
-
+# Set paths
+path         = "../../Dropbox/Kinetics of Surface Reactions/H-Oxidation-Pt/"
 data_path    = path * "data/"
-model_path   = path * "models/"
-results_path = path * "results/" * "nu3_1/"
+model_path   = "./"#path * "models/"
 
 # Julia code containing a kinetic model
-model_file = "Theos_All_Step_Model.jl"
+model_fn = "eqns"#"Theos_All_Step_Model"
+include(model_path * model_fn * ".jl")
+
+# Julia code containing a fitting function
+fit_function_fn = "./fit_function.jl"
+include(fit_function_fn)
+
+results_path = path * "results/" * model_fn
 
 # tag delimiter in file names
 delim    = "-"
@@ -55,6 +60,8 @@ what_to_do = ("fit",      "rrr", "facet", "tag")
 what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
 
+# Construct a list of fitting parameter names
+fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 
 # initial guesses for the Arrhenius parameters cooked by Theo
 ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
