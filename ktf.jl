@@ -63,6 +63,7 @@ T_cutoff = 480.0 # max temperature for Arrhenius fit
 # Construct a list of fitting parameter names
 fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 
+
 # initial guesses for the Arrhenius parameters cooked by Theo
 ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
 ϵ_theoguess = [ 0.2, 2.0, 0.4, 0.36, 0.75, 0.5 ] # eV
@@ -70,6 +71,8 @@ fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
 #
+
+ksr.ini_guess!(df2fit, "1", ν_theoguess[1], false, true, ϵ_theoguess[1], false, true)
 
 if fit_is_local
     # -------------------------------------------------------------------------------
