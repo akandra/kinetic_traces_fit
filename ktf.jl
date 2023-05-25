@@ -70,9 +70,23 @@ fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
-#
+# logic:    if glbl field for both prefactor and energy is set to true
+#           then we do a global fit with Arrhenius parameters 
 
-ksr.ini_guess!(df2fit, "1", ν_theoguess[1], false, true, ϵ_theoguess[1], false, true)
+BEGIN HERE
+
+ksr.ini_guess!(df2fit, "1",        ν, true,  true, ϵ,  true, true)
+
+ksr.ini_guess!(df2fit, "1", A(ν,ϵ,T), true, false, 0, false, true)
+
+ksr.ini_guess!(df2fit, "1",        ν, false, true, ϵ, false, true)
+
+
+
+
+ksr.ini_guess!(df2fit, "1", ν_theoguess[1], true, true, ϵ_theoguess[1], true, true)
+
+ksr.ini_guess!(df2fit, "1", Arrhenius(ν_theoguess[1],ϵ_theoguess[1],df[i].temperature), true, false, 0, false, true)
 
 if fit_is_local
     # -------------------------------------------------------------------------------
