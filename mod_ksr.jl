@@ -42,7 +42,7 @@ include("local_fit.jl")
 include("H2OProduction.jl")
 
 # function defining the kinetic model
-include("eqns.jl")
+include("kinetic_model.jl")
 include("H2Pulse.jl")
 
 # function creating the dataframe

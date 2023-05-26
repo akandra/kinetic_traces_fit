@@ -4,8 +4,6 @@
 # Note: use "ν" to start a name of prefactor parameter,
 #       and "ϵ" to start a name of energy parameter
 fitparsnames_model = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5"]
-# we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
-#[ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
 
 
 function eqns!(ydot,y,p,t, beampars, geompars)

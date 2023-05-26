@@ -9,7 +9,7 @@ data_path    = path * "data/"
 model_path   = "./"#path * "models/"
 
 # Julia code containing a kinetic model
-model_fn = "eqns"#"Theos_All_Step_Model"
+model_fn = "kinetic_model"#"Theos_All_Step_Model"
 include(model_path * model_fn * ".jl")
 
 # Julia code containing a fitting function
@@ -63,7 +63,6 @@ T_cutoff = 480.0 # max temperature for Arrhenius fit
 # Construct a list of fitting parameter names
 fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 
-
 # initial guesses for the Arrhenius parameters cooked by Theo
 ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
 ϵ_theoguess = [ 0.2, 2.0, 0.4, 0.36, 0.75, 0.5 ] # eV
@@ -73,20 +72,13 @@ fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 # logic:    if glbl field for both prefactor and energy is set to true
 #           then we do a global fit with Arrhenius parameters 
 
-BEGIN HERE
+# ksr.guess_Arrh!(df2fit, "ν1",  ν_theoguess[1], "ϵ1", ϵ_theoguess[1], true)
+# ksr.guess!(df2fit, "ν1",  ν_theoguess[1], true, false, "ϵ1", ϵ_theoguess[1], true, false)
 
-ksr.ini_guess!(df2fit, "1",        ν, true,  true, ϵ,  true, true)
-
-ksr.ini_guess!(df2fit, "1", A(ν,ϵ,T), true, false, 0, false, true)
-
-ksr.ini_guess!(df2fit, "1",        ν, false, true, ϵ, false, true)
+ksr.guess_rate!(df2fit, "k1",  ν_theoguess[1], ϵ_theoguess[1], true)
 
 
-
-
-ksr.ini_guess!(df2fit, "1", ν_theoguess[1], true, true, ϵ_theoguess[1], true, true)
-
-ksr.ini_guess!(df2fit, "1", Arrhenius(ν_theoguess[1],ϵ_theoguess[1],df[i].temperature), true, false, 0, false, true)
+stop
 
 if fit_is_local
     # -------------------------------------------------------------------------------
