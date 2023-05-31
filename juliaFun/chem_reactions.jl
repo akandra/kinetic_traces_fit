@@ -15,7 +15,7 @@ reqs = @reaction_network begin
     k₅,     H₂O      → 0
   end
 
-latexify(reqs, env=:chemical) |> render
+latexify(reqs, env=:chemical; mathjax = true) |> render
 latexify(reqs,form=:ode) |> render
 
   p = (:t₀=>1.0, :σ=>.1, :k₁ => 1.0, :kᵦ => 1e-3,:k₂ => 1.0,:k₃ => 10.0,:k₄ => 1.0,:k₅ => 100.0)

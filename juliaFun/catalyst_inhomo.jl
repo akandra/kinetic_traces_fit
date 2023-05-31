@@ -9,7 +9,7 @@ reqs = @reaction_network begin
     s(t,t₀,σ), 0 --> A
 end
 
-latexify(reqs, env=:chemical) |> render
+latexify(reqs; env=:chemical) |> render
 latexify(reqs,form=:ode) |> render
 
 p = (:t₀=>1.0, :σ=>.1)
