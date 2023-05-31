@@ -6,6 +6,8 @@ using Parameters
 using DifferentialEquations
 using LsqFit
 using Plots
+using Catalyst
+using Latexify
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
@@ -42,7 +44,7 @@ include("local_fit.jl")
 include("H2OProduction.jl")
 
 # function defining the kinetic model
-include("eqns.jl")
+include("Theos_All_Step.jl")
 include("H2Pulse.jl")
 
 # function creating the dataframe
