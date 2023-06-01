@@ -40,6 +40,10 @@ function create_df(data_path)
     # we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
     [ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
 
+    # create reaction network objects
+    df[!,:reaction] = [ react( (t)->H2Pulse(t,df.beampars[i][1],df.beampars[i][2],df.beampars[i][3]) ) 
+                        for i in 1:nrow(df)]
+
     return df
 
 end

@@ -31,14 +31,21 @@ function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
     flux=Float64[]
     for (i, d) in enumerate(data)
 
-        y0 = [0.0, df2fit.Oini[i], 0.0, 0.0, 0.0]
+#    y0 = [0.0, df2fit.Oini[i], 0.0, 0.0, 0.0]
+        y0 = [:H₂ => 0.,:O => df2fit.Oini[i], :H => 0.0, :OH => 0.0, :H₂O => 0.0]
+
         tspan = ( d[begin,1], d[end,1] + 200.0 ) #.- t0s[i]
 
         νs = [ df2fitpar[:, r][i].value for r in [:ν1,:νm1,:ν2,:ν3,:ν4,:ν5] ]
         ϵs = [ df2fitpar[:, r][i].value for r in [:ϵ1,:ϵm1,:ϵ2,:ϵ3,:ϵ4,:ϵ5] ]
-        rates = Arrhenius.( df2fit.temperature[i], νs, ϵs)
+#        rates = Arrhenius.( df2fit.temperature[i], νs, ϵs)
+        rates = Pair.(parameters(reqs),Arrhenius.( df2fit.temperature[i], νs, ϵs))
 
-        prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]) ,y0,tspan,rates )
+#        prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]) ,y0,tspan,rates )
+
+  
+# # solve ODEs
+        prob = ODEProblem(reqs, y0, tspan, rates)
         sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
         
         normfactor = maximum(sol)

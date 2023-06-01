@@ -7,7 +7,6 @@ using DifferentialEquations
 using LsqFit
 using Plots
 using Catalyst
-using Latexify
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar

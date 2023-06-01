@@ -1,17 +1,13 @@
-f(t,t₀,σ) = exp(-(t - t₀)^2/(2*σ^2))/(σ*sqrt(2*π))
-
-function react()
+function react(pump_pulse::Function)
 
     return @reaction_network begin
-        @parameters t₀ σ k₁ kᵦ k₂ k₃ k₄ k₅
-        #  @species A(t)
-    
-        f(t,t₀,σ), ∅ → H₂
-        (k₁,kᵦ),   H₂ + O ↔ OH + H
-        k₂,       H + OH → H₂O
-        k₃,      OH + OH → H₂O
-        k₄,       H +  H → H₂
-        k₅,     H₂O      → 0
+
+        pump_pulse(t), ∅ → H₂
+        (k₁, k₋₁), H₂ + O  ↔ OH + H
+        k₂,         H + OH → H₂O
+        k₃,        OH + OH → H₂O
+        k₄,         H +  H → H₂
+        k₅,       H₂O      → ∅
     end
 
 end

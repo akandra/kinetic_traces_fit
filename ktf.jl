@@ -1,8 +1,8 @@
 using Statistics: mean
+using Latexify
 
 include("mod_ksr.jl")
 import .Kinetics_of_Surface_Reactions as ksr
-
 
 # set paths to the data and results folders
 path         = "../../Dropbox/Kinetics of Surface Reactions/"

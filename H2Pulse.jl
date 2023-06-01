@@ -1,4 +1,4 @@
-function H2Pulse(t::Float64, a::Vector{Float64}, fwhm::Vector{Float64}, tcenter::Vector{Float64})
+function H2Pulse(t, a::Vector{Float64}, fwhm::Vector{Float64}, tcenter::Vector{Float64})
 
     sigma = fwhm / ( 2.0*sqrt(2.0*log(2.0)) )
     
