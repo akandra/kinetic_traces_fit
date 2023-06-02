@@ -47,7 +47,7 @@ kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 
 fit_is_local = true
 what_to_do = ("fit",      "rrr", "facet", "tag")
-what_to_do = ("analysis", "rrr", "facet", "tag")
+#what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
 
 # set initial values for the fitting parameters and other defaults
