@@ -41,7 +41,7 @@ function create_df(data_path)
     [ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
 
     # create reaction network objects
-    df[!,:reaction] = [ react( (t)->H2Pulse(t,df.beampars[i][1],df.beampars[i][2],df.beampars[i][3]) ) 
+    df[!,:reaction] = [ react( ) 
                         for i in 1:nrow(df)]
 
     return df

@@ -5,7 +5,6 @@ f(t,t₀,σ) = exp(-(t - t₀)^2/(2*σ^2))/(σ*sqrt(2*π))
 
 reqs = @reaction_network begin
   @parameters t₀ σ k₁ kᵦ k₂ k₃ k₄ k₅
-#  @species A(t)
  
     f(t,t₀,σ), ∅ → H₂
     (k₁,kᵦ),   H₂ + O ↔ OH + H

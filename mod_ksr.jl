@@ -44,6 +44,7 @@ include("H2OProduction.jl")
 
 # function defining the kinetic model
 include("Theos_All_Step.jl")
+include("eqns.jl")
 include("H2Pulse.jl")
 
 # function creating the dataframe

@@ -1,8 +1,9 @@
-function react(pump_pulse::Function)
+function react()
 
     return @reaction_network begin
+        @parameters a1 a2 a3 σ1 σ2 σ3 tc1 tc2 tc3 k₁ k₋₁ k₂ k₃ k₄ k₅
 
-        pump_pulse(t), ∅ → H₂
+        H2Pulse(t,[a1,a2,a3],[σ1,σ2,σ3],[tc1,tc2,tc3]), ∅ → H₂
         (k₁, k₋₁), H₂ + O  ↔ OH + H
         k₂,         H + OH → H₂O
         k₃,        OH + OH → H₂O
@@ -12,6 +13,19 @@ function react(pump_pulse::Function)
 
 end
 
+# function react(pump_pulse::Function)
+
+#     return @reaction_network begin
+
+#         pump_pulse(t), ∅ → H₂
+#         (k₁, k₋₁), H₂ + O  ↔ OH + H
+#         k₂,         H + OH → H₂O
+#         k₃,        OH + OH → H₂O
+#         k₄,         H +  H → H₂
+#         k₅,       H₂O      → ∅
+#     end
+
+# end
 # latexify(reqs, env=:chemical; mathjax = true) |> render
 # latexify(reqs,form=:ode) |> render
 
