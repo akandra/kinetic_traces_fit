@@ -3,13 +3,17 @@
 # Set the names for fit parameter dataframe columns
 # Note: use "ν" to start a name of prefactor parameter,
 #       and "ϵ" to start a name of energy parameter
-fitparsnames_model = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5"]
+#fitparsnames_model = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5"]
+
+species_model = ["H₂", "O", "OH", "H", "H₂O"]
+
+rate_constants_model = ["k1","km1","k2","k3","k4","k5"]
 
 
 function eqns!(ydot,y,p,t, beampars, geompars)
 
     # All-step model from Theo (everything occurs on steps)
-    # (1)  H₂ + O <- km1, k1 -> HO + H
+    # (1)  H₂ + O <- km1, k1 -> OH + H
     # (2)  H + OH -k2> H₂O 
     # (3) OH + OH -k3> H₂O + O
     # (4)  H + H  -k4> H₂ 

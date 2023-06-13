@@ -75,8 +75,10 @@ fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 # ksr.guess_Arrh!(df2fit, "ν1",  ν_theoguess[1], "ϵ1", ϵ_theoguess[1], true)
 # ksr.guess!(df2fit, "ν1",  ν_theoguess[1], true, false, "ϵ1", ϵ_theoguess[1], true, false)
 
-ksr.guess_rate!(df2fit, "k1",  ν_theoguess[1], ϵ_theoguess[1], true)
-
+for (i, r) in enumerate(rate_constants_model)
+    ksr.guess_rate!(df2fit, r,  ν_theoguess[i], ϵ_theoguess[i], false)
+end
+    ksr.guess_rate!(df2fit, rate_constants_model[4],  ν_theoguess[4], ϵ_theoguess[4], true)
 
 stop
 
