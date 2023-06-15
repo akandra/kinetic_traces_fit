@@ -52,71 +52,65 @@ ndata = ksr.nrow(df2fit)
 kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 
 # Set what is to be done
-# fit_is_local = true or false
 # what_to_do   = "fit" or "analysis"
 
-fit_is_local = true
 what_to_do = ("fit",      "rrr", "facet", "tag")
 what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
 
 # Construct a list of fitting parameter names
-fitparsnames = [ fitparsnames_model; fitparsnames_fit]
-
-# initial guesses for the Arrhenius parameters cooked by Theo
-ν_theoguess = [ 1.0*10^5, 1.0*10^5, 1.0*10^5, 3.0*10^4, 1.0*10^6, 1.0*10^10 ] # μs
-ϵ_theoguess = [ 0.2, 2.0, 0.4, 0.36, 0.75, 0.5 ] # eV
+#fitparsnames = [ fitparsnames_model; fitparsnames_fit]
 
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
-# logic:    if glbl field for both prefactor and energy is set to true
-#           then we do a global fit with Arrhenius parameters 
 
-# ksr.guess_Arrh!(df2fit, "ν1",  ν_theoguess[1], "ϵ1", ϵ_theoguess[1], true)
+# ksr.guess_Arrh!(df2fit, "k1",  1.0*10^5, 0.2, true)
 # ksr.guess!(df2fit, "ν1",  ν_theoguess[1], true, false, "ϵ1", ϵ_theoguess[1], true, false)
 
-for (i, r) in enumerate(rate_constants_model)
-    ksr.guess_rate!(df2fit, r,  ν_theoguess[i], ϵ_theoguess[i], false)
-end
-    ksr.guess_rate!(df2fit, rate_constants_model[4],  ν_theoguess[4], ϵ_theoguess[4], true)
+#                       name         ν      ϵ     var
+ksr.guess_rate!(df2fit, "k1",  1.0*10^5,  0.2,  false)
+ksr.guess_rate!(df2fit,"km1",  1.0*10^5,  2.0,  false)
+ksr.guess_rate!(df2fit, "k2",  1.0*10^5,  0.4,  false)
+ksr.guess_rate!(df2fit, "k3",  3.0*10^4,  0.36, true)
+ksr.guess_rate!(df2fit, "k4",  1.0*10^6,  0.75, false)
+ksr.guess_rate!(df2fit, "k5",  1.0*10^10, 0.5,  false)
 
+# create df columns for fit function pars
+[ df2fit[!,n] = [ksr.fitpar() for _ in 1:ndata] for n in fit_parnames]
+
+for i=1:ndata
+
+    df2fit.a[i].value = maxs[i][1]*0.25
+    df2fit.a[i].min   = 0.001
+    df2fit.a[i].var   = true
+
+    df2fit.t0[i].value = -100.0
+    df2fit.t0[i].min   = -200.0
+    df2fit.t0[i].max   =  200.0
+    df2fit.t0[i].var   = true
+
+    df2fit.f_tr[i].value = 0.001
+    df2fit.f_tr[i].min   = 0.0
+    df2fit.f_tr[i].max   = Inf
+    df2fit.f_tr[i].glbl  = false
+    df2fit.f_tr[i].var   = true
+
+    df2fit.k_vac[i].value = 1e-5
+    df2fit.k_vac[i].glbl  = false
+    df2fit.k_vac[i].var   = false
+end
+
+NEXTTIME: go on from here
 stop
+
+
 
 if fit_is_local
     # -------------------------------------------------------------------------------
     # LOCAL FIT
     # -------------------------------------------------------------------------------
     
-        # rates
-        ksr.ini_guess!(df2fit, "1", ν_theoguess[1], false, false, ϵ_theoguess[1])
-        ksr.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2])
-        ksr.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3])
-        ksr.ini_guess!(df2fit, "3", ν_theoguess[4],  true, false, ϵ_theoguess[4])
-        ksr.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5])
-        ksr.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6])
-    
-        # amplitudes, t_0 etc.
-        for i=1:ndata
-    
-            df2fit.a[i].value = maxs[i][1]*0.25
-            df2fit.a[i].min   = 0.001
-            df2fit.a[i].var   = true
-        
-            df2fit.t0[i].value = -100.0
-            df2fit.t0[i].min   = -200.0
-            df2fit.t0[i].max   =  200.0
-            df2fit.t0[i].var   = true
-        
-            df2fit.f_tr[i].value = 0.001
-            df2fit.f_tr[i].min   = 0.0
-            df2fit.f_tr[i].max   = Inf
-            df2fit.f_tr[i].glbl  = false
-            df2fit.f_tr[i].var   = true
-        
-            df2fit.k_vac[i].value = 1e-5
-            df2fit.k_vac[i].glbl  = false
-            df2fit.k_vac[i].var   = false
-        end
+   
         
     else
     # -------------------------------------------------------------------------------

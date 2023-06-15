@@ -2,15 +2,12 @@
 Adds columns to the df with initial guesses for Arrhenius prefactor and energy
 for a global fit
 """
-function guess_Arrh!(df::DataFrame, νname::String, ν::Float64, ϵname::String, ϵ::Float64, var::Bool)
+function guess_Arrh!(df::DataFrame, kname::String, ν::Float64, ϵ::Float64, var::Bool)
 
+    guess_rate!(df, kname,  ν, ϵ,  true)
 
-    if νname in names(df)
-        error("guess_Arrh(): duplicate parameter name "*νname)
-    end
-    if ϵname in names(df)
-        error("guess_Arrh(): duplicate parameter name "*ϵname)
-    end
+    νname = "ν_"*kname
+    ϵname = "ϵ_"*kname
 
     df[!,νname] = [fitpar() for _ in 1:nrow(df)]
     df[!,ϵname] = [fitpar() for _ in 1:nrow(df)]
@@ -33,6 +30,10 @@ Adds columns to the df with initial guesses for rate for a local fit
 """
 function guess_rate!(df::DataFrame, kname::String, ν::Float64, ϵ::Float64, var::Bool)
 
+    if !(kname in keys(rate_constants))
+        error("guess_rate(): parameter "*kname*" does not exist")
+    end
+
     if kname in names(df)
         error("guess_rate(): duplicate parameter name "*kname)
     end
@@ -43,11 +44,6 @@ function guess_rate!(df::DataFrame, kname::String, ν::Float64, ϵ::Float64, var
         df[i,kname].var   = var
         df[i,kname].min   = df[i,kname].value/1024.0
         df[i,kname].glbl  = false
-        # Consider to get rid of what follows
-        # df[i,ϵname].value = 0.0
-        # df[i,ϵname].var   = false
-        # df[i,ϵname].min   = df[i,ϵname].value/1024.0
-        # df[i,ϵname].glbl  = false
     end
     
 end
