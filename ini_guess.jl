@@ -1,4 +1,11 @@
 """
+Adds columns to the df with initial guesses for a fitting parameter
+"""
+function guess_par(df::DataFrame, name::String; val)
+
+end
+
+"""
 Adds columns to the df with initial guesses for Arrhenius prefactor and energy
 for a global fit
 """
