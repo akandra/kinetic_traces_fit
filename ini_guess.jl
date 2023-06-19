@@ -1,20 +1,49 @@
 """
 Adds columns to the df with initial guesses for a fitting parameter
 """
-function guess_par(df::DataFrame, name::String; val)
+function guess_par!(df::DataFrame; name::String, value,
+                    min::Float64   = -Inf,
+                    max::Float64   = Inf,
+                    var::Bool      = false,
+                    glbl::Bool     = false)
 
+    if !(name in [rate_constants; fit_parnames])
+        error("guess_par(): parameter "*name*" does not exist")
+    end
+
+    if name in names(df)
+        error("guess_par(): duplicate parameter name "*name)
+    end
+
+    if value isa Vector && size(value,1) != nrow(df)
+      error("guess_par():  length of values vector has to be equal to number of data files.")
+      end
+          df[!,name] = [fitpar() for _ in 1:nrow(df)]
+
+    for i=1:nrow(df)
+        if value isa Vector{Float64}
+            df[i,name].value = value[i]
+        elseif value isa Float64
+            df[i,name].value = value
+        end
+        df[i,name].min   = min
+        df[i,name].max   = max
+        df[i,name].var   = var
+        df[i,name].glbl  = glbl
+    end
+                
 end
 
 """
 Adds columns to the df with initial guesses for Arrhenius prefactor and energy
 for a global fit
 """
-function guess_Arrh!(df::DataFrame, kname::String, ν::Float64, ϵ::Float64, var::Bool)
+function guess_Arrh!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
 
-    guess_rate!(df, kname,  ν, ϵ,  true)
+    guess_rate!(df, name,  ν, ϵ,  true)
 
-    νname = "ν_"*kname
-    ϵname = "ϵ_"*kname
+    νname = "ν_"*name
+    ϵname = "ϵ_"*name
 
     df[!,νname] = [fitpar() for _ in 1:nrow(df)]
     df[!,ϵname] = [fitpar() for _ in 1:nrow(df)]
@@ -35,22 +64,22 @@ end
 """
 Adds columns to the df with initial guesses for rate for a local fit
 """
-function guess_rate!(df::DataFrame, kname::String, ν::Float64, ϵ::Float64, var::Bool)
+function guess_rate!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
 
-    if !(kname in keys(rate_constants))
-        error("guess_rate(): parameter "*kname*" does not exist")
+    if !(name in rate_constants)
+        error("guess_rate(): parameter "*name*" does not exist")
     end
 
-    if kname in names(df)
-        error("guess_rate(): duplicate parameter name "*kname)
+    if name in names(df)
+        error("guess_rate(): duplicate parameter name "*name)
     end
 
-    df[!,kname] = [fitpar() for _ in 1:nrow(df)]
+    df[!,name] = [fitpar() for _ in 1:nrow(df)]
     for i=1:nrow(df)
-        df[i,kname].value = Arrhenius(df[i,:temperature], ν, ϵ)
-        df[i,kname].var   = var
-        df[i,kname].min   = df[i,kname].value/1024.0
-        df[i,kname].glbl  = false
+        df[i,name].value = Arrhenius(df[i,:temperature], ν, ϵ)
+        df[i,name].var   = var
+        df[i,name].min   = df[i,name].value/1024.0
+        df[i,name].glbl  = false
     end
     
 end

@@ -64,16 +64,15 @@ T_cutoff = 480.0 # max temperature for Arrhenius fit
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
 
-# ksr.guess_Arrh!(df2fit, "k1",  1.0*10^5, 0.2, true)
-# ksr.guess!(df2fit, "ν1",  ν_theoguess[1], true, false, "ϵ1", ϵ_theoguess[1], true, false)
+ksr.guess_Arrh!(df2fit, name= "k1", ν=1.0*10^5,  ϵ=0.2,  var=false)
+ksr.guess_Arrh!(df2fit, name="km1", ν=1.0*10^5,  ϵ=2.0,  var=false)
+ksr.guess_Arrh!(df2fit, name= "k2", ν=1.0*10^5,  ϵ=0.4,  var=false)
+ksr.guess_Arrh!(df2fit, name= "k3", ν=3.0*10^4,  ϵ=0.36, var=true)
+ksr.guess_Arrh!(df2fit, name= "k4", ν=1.0*10^6,  ϵ=0.75, var=false)
+ksr.guess_Arrh!(df2fit, name= "k5", ν=1.0*10^10, ϵ=0.5,  var=false)
 
-#                       name         ν      ϵ     var
-ksr.guess_rate!(df2fit, "k1",  1.0*10^5,  0.2,  false)
-ksr.guess_rate!(df2fit,"km1",  1.0*10^5,  2.0,  false)
-ksr.guess_rate!(df2fit, "k2",  1.0*10^5,  0.4,  false)
-ksr.guess_rate!(df2fit, "k3",  3.0*10^4,  0.36, true)
-ksr.guess_rate!(df2fit, "k4",  1.0*10^6,  0.75, false)
-ksr.guess_rate!(df2fit, "k5",  1.0*10^10, 0.5,  false)
+ksr.guess_par(df2fit, name= "a", value= 0.25*maxs[:][1], min=0.001, var=true, glbl=false)
+ksr.guess_par(df2fit, name="t0", value=-100, min=-200.0, max=200.0, var=true, glbl=false)
 
 # create df columns for fit function pars
 [ df2fit[!,n] = [ksr.fitpar() for _ in 1:ndata] for n in fit_parnames]

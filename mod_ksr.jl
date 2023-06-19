@@ -39,6 +39,7 @@ include("global_fit.jl")
 include("local_fit.jl")
 
 # function calculating the fitting function
+include("fit_function.jl")
 include("H2OProduction.jl")
 
 # function defining the kinetic model

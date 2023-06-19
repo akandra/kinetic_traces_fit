@@ -48,83 +48,35 @@ condition = df.ktfname .∈ [ktfnames[1:6]]
 df2fit = df[condition,:]
 ndata = ksr.nrow(df2fit)
 
-# load kinetic traces
-kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
-
 # Set what is to be done
 # what_to_do   = "fit" or "analysis"
-
 what_to_do = ("fit",      "rrr", "facet", "tag")
 what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
 
-# Construct a list of fitting parameter names
-#fitparsnames = [ fitparsnames_model; fitparsnames_fit]
+# load kinetic traces
+kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path, cutoff=-Inf)
 
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
 
-# ksr.guess_Arrh!(df2fit, "k1",  1.0*10^5, 0.2, true)
-# ksr.guess!(df2fit, "ν1",  ν_theoguess[1], true, false, "ϵ1", ϵ_theoguess[1], true, false)
+ksr.guess_rate!(df2fit, name= "k1", ν=1.0*10^5,  ϵ=0.2,  var=false)
+ksr.guess_rate!(df2fit, name="km1", ν=1.0*10^5,  ϵ=2.0,  var=false)
+ksr.guess_rate!(df2fit, name= "k2", ν=1.0*10^5,  ϵ=0.4,  var=false)
+ksr.guess_rate!(df2fit, name= "k3", ν=3.0*10^4,  ϵ=0.36, var=true)
+ksr.guess_rate!(df2fit, name= "k4", ν=1.0*10^6,  ϵ=0.75, var=false)
+ksr.guess_rate!(df2fit, name= "k5", ν=1.0*10^10, ϵ=0.5,  var=false)
 
-#                       name         ν      ϵ     var
-ksr.guess_rate!(df2fit, "k1",  1.0*10^5,  0.2,  false)
-ksr.guess_rate!(df2fit,"km1",  1.0*10^5,  2.0,  false)
-ksr.guess_rate!(df2fit, "k2",  1.0*10^5,  0.4,  false)
-ksr.guess_rate!(df2fit, "k3",  3.0*10^4,  0.36, true)
-ksr.guess_rate!(df2fit, "k4",  1.0*10^6,  0.75, false)
-ksr.guess_rate!(df2fit, "k5",  1.0*10^10, 0.5,  false)
+ksr.guess_par!(df2fit, name= "a",   value= 0.25*first.(maxs), min=0.001, var=true, glbl=false)
+ksr.guess_par!(df2fit, name="t0",   value=-100.0,  min=-200.0, max=200.0, var=true, glbl=false)
+ksr.guess_par!(df2fit, name="f_tr", value=1e-3, min=0.0, var=true, glbl=false)
+ksr.guess_par!(df2fit, name="k_vac",value=1e-5, var=false, glbl=false)
 
-NEXTIME: make guess with optional keyword arguments
-
-ksr.guess_par(df2fit, "a", val= maxs[:][1]*0.25, min=0.001, var=true)
-ksr.guess_par(df2fit, "t0", val= -100.0, min=-200.0, max=200.0, var=true)
-
-ksr.guess_a(df2fit, 0.25, 0.001, true)
-
-# create df columns for fit function pars
-[ df2fit[!,n] = [ksr.fitpar() for _ in 1:ndata] for n in fit_parnames]
-
-for i=1:ndata
-
-    df2fit.a[i].value = maxs[i][1]*0.25
-    df2fit.a[i].min   = 0.001
-    df2fit.a[i].var   = true
-
-    df2fit.t0[i].value = -100.0
-    df2fit.t0[i].min   = -200.0
-    df2fit.t0[i].max   =  200.0
-    df2fit.t0[i].var   = true
-
-    df2fit.f_tr[i].value = 0.001
-    df2fit.f_tr[i].min   = 0.0
-    df2fit.f_tr[i].max   = Inf
-    df2fit.f_tr[i].glbl  = false
-    df2fit.f_tr[i].var   = true
-
-    df2fit.k_vac[i].value = 1e-5
-    df2fit.k_vac[i].glbl  = false
-    df2fit.k_vac[i].var   = false
-end
-
+ksr.guess_par!(df2fit, name="baseline",value=set_baseline(ndata), var=false, glbl=false)
     
-# set initial values for baselines
-for i=1:ndata
-    bl_range = findfirst( x -> x>mins[i][1]+δs[i]/2 ,kinetic_traces[i][1:maxs[i][2],2]) - 7
-    df2fit.baseline[i].value = mean(kinetic_traces[i][1:bl_range,2])
-    #df2fit.baseline[i].value = 0.0
-end
-    
-ksr.set_cutoff(-10.0)
-# set data cutoffs
-cutoff = zeros(Int32, ndata)
-for (k,kt) in enumerate(kinetic_traces)
-    vmax, imax = maxs[k]
-    iend = findfirst(kt[imax:end,2] .< -10.0*vmax )
-    cutoff[k] = typeof(iend) == Int ? iend + imax : size(kt,1) 
-end
-df2fit[!,:cutoff] = cutoff
-    
+
+NEXTTIME: gloriously go on!
+   
     # select df columns of type fitpar
     df2fitpar = df2fit[!,names(df2fit,ksr.fitpar)]
     # save initial guesses
