@@ -17,14 +17,17 @@ function guess_par!(df::DataFrame; name::String, value,
 
     if value isa Vector && size(value,1) != nrow(df)
       error("guess_par():  length of values vector has to be equal to number of data files.")
-      end
-          df[!,name] = [fitpar() for _ in 1:nrow(df)]
+    end
+          
+    df[!,name] = [fitpar() for _ in 1:nrow(df)]
 
     for i=1:nrow(df)
-        if value isa Vector{Float64}
+        if value isa Vector#{Float64}
             df[i,name].value = value[i]
-        elseif value isa Float64
+        elseif value isa Number
             df[i,name].value = value
+        else
+            error("guess_par(): a value must be a number or a vector of numbers")
         end
         df[i,name].min   = min
         df[i,name].max   = max

@@ -1,31 +1,28 @@
-using Statistics: mean
-
 include("mod_ksr.jl")
 import .Kinetics_of_Surface_Reactions as ksr
 
 # Set paths
-path         = "../../Dropbox/Kinetics of Surface Reactions/H-Oxidation-Pt/"
-data_path    = path * "data/"
-model_path   = "./"#path * "models/"
+ksr.working_dir("../../Dropbox/Kinetics of Surface Reactions/H-Oxidation-Pt")
+ksr.path_to_data("data")
+ksr.path_to_model("",".")
+ksr.path_to_fit_function("",".")
 
-# Julia code containing a kinetic model
-model_fn = "kinetic_model"#"Theos_All_Step_Model"
-include(model_path * model_fn * ".jl")
+# Julia code containing a kinetic model and a fitting function
+ksr.model("kinetic_model")
+ksr.fit_function("fit_function")
 
-# Julia code containing a fitting function
-fit_function_fn = "./fit_function.jl"
-include(fit_function_fn)
-
-results_path = path * "results/" * model_fn
+ksr.path_to_output("out", @__FILE__)
 
 # tag delimiter in file names
-delim    = "-"
+ksr.delim("-")
 # set suffices for beam file names
-pump_sfx = "beam"
-cov_sfx  = "Oini"
+ksr.pump_sfx("beam")
+ksr.cov_sfx("Oini")
+
+stop
 
 # create dataframe
-df = ksr.create_df(data_path, delim, pump_sfx, cov_sfx)
+#df = ksr.create_df(data_path, delim, pump_sfx, cov_sfx)
 
 # select kinetic trace data to fit
 ktfnames = [
@@ -39,7 +36,8 @@ ktfnames = [
 
 condition = df.ktfname .∈ [ktfnames[1:6]]
 #df2fit = filter( :ktfname => in(ktfnames),df)
-#condition = (df.rrr .== 2) # .| (df.rrr .== 8.0)
+condition = (df.rrr .== 2) # .| (df.rrr .== 8.0)
+ksr.conditions("rrr", ".==", 2)
 #condition = (df.tag .!= "20201103") .| (df.tag .!= "20201118") 
 #df2fit = filter([:facet,:rrH2,:rrO2] => (f,h,o) ->  f=="332" && h==100 && o==100 ,df)
 # dataframe with data to fit
@@ -68,14 +66,14 @@ ksr.guess_rate!(df2fit, name= "k4", ν=1.0*10^6,  ϵ=0.75, var=false)
 ksr.guess_rate!(df2fit, name= "k5", ν=1.0*10^10, ϵ=0.5,  var=false)
 
 ksr.guess_par!(df2fit, name= "a",   value= 0.25*first.(maxs), min=0.001, var=true, glbl=false)
-ksr.guess_par!(df2fit, name="t0",   value=-100.0,  min=-200.0, max=200.0, var=true, glbl=false)
+
+ksr.guess_par!(df2fit, name="t0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
 ksr.guess_par!(df2fit, name="f_tr", value=1e-3, min=0.0, var=true, glbl=false)
 ksr.guess_par!(df2fit, name="k_vac",value=1e-5, var=false, glbl=false)
 
 ksr.guess_par!(df2fit, name="baseline",value=set_baseline(ndata), var=false, glbl=false)
     
-
-NEXTTIME: gloriously go on!
+stop
    
     # select df columns of type fitpar
     df2fitpar = df2fit[!,names(df2fit,ksr.fitpar)]

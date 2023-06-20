@@ -6,6 +6,7 @@ using Parameters
 using DifferentialEquations
 using LsqFit
 using Plots
+using Statistics: mean
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
@@ -17,6 +18,9 @@ using Plots
     glbl::Bool     = false
 
 end
+
+# path functions
+include("set_paths.jl")
 
 # in/out functions
 include("get_pump_beam.jl")
@@ -39,14 +43,15 @@ include("global_fit.jl")
 include("local_fit.jl")
 
 # function calculating the fitting function
-include("fit_function.jl")
 include("H2OProduction.jl")
 
 # function defining the kinetic model
-include("kinetic_model.jl")
 include("H2Pulse.jl")
 
 # function creating the dataframe
 include("create_df.jl")
+
+# do-it function
+#include("do_it.jl")
 
 end
