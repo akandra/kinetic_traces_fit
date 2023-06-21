@@ -19,8 +19,8 @@ using Statistics: mean
 
 end
 
-# path functions
-include("set_paths.jl")
+# functions logging things from input
+include("log_stuff.jl")
 
 # in/out functions
 include("get_pump_beam.jl")
@@ -52,6 +52,6 @@ include("H2Pulse.jl")
 include("create_df.jl")
 
 # do-it function
-#include("do_it.jl")
+include("do_it.jl")
 
 end

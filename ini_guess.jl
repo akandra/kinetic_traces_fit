@@ -1,7 +1,7 @@
 """
 Adds columns to the df with initial guesses for a fitting parameter
 """
-function guess_par!(df::DataFrame; name::String, value,
+function set_guess_par!(df::DataFrame; name::String, value,
                     min::Float64   = -Inf,
                     max::Float64   = Inf,
                     var::Bool      = false,
@@ -41,7 +41,7 @@ end
 Adds columns to the df with initial guesses for Arrhenius prefactor and energy
 for a global fit
 """
-function guess_Arrh!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
+function set_guess_Arrh!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
 
     guess_rate!(df, name,  ν, ϵ,  true)
 
@@ -67,7 +67,7 @@ end
 """
 Adds columns to the df with initial guesses for rate for a local fit
 """
-function guess_rate!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
+function set_guess_rate!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
 
     if !(name in rate_constants)
         error("guess_rate(): parameter "*name*" does not exist")
@@ -94,7 +94,7 @@ with detailed specifications for globality and variability
 
 Warning: the function is too flexible, so be careful
 """
-function guess!(df::DataFrame, 
+function set_guess!(df::DataFrame, 
                     νname::String, ν::Float64, var_ν::Bool, glbl_ν::Bool,
                     ϵname::String, ϵ::Float64, var_ϵ::Bool, glbl_ϵ::Bool)
 
