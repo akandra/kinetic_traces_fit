@@ -1,6 +1,5 @@
-function create_df(data_path, delim, pump_sfx, cov_sfx)
+function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::String)
 
-    # Warning: don't forget to remove selection
     datafilenames = readdir(data_path)
     pumpfnames      = filter(x-> occursin(pump_sfx,x) ,datafilenames)
     covfnames       = filter(x-> occursin(cov_sfx,x) ,datafilenames)

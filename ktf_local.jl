@@ -20,15 +20,15 @@ ksr.pump_sfx("beam")
 ksr.cov_sfx("Oini")
 
 # set conditions selecting data
-ksr.conditions("rrr", ".==", 2)
-ksr.conditions(   "20170828-332-373-100-200.dat", 
-                  "20170828-332-423-100-200.dat", 
-                 "20170828-332-473-100-200.dat",
-                 "20201117-111-373-25-50.dat", 
-                 "20201117-111-423-25-50.dat", 
-                 "20201117-111-473-25-50.dat")
-#ksr.conditions(2,21)
-ksr.conditions(1:10)
+# ksr.conditions( :rrr => ==(2) )
+ksr.conditions( "20170828-332-373-100-200.dat", 
+                "20170828-332-423-100-200.dat", 
+                "20170828-332-473-100-200.dat",
+                "20201117-111-373-25-50.dat", 
+                "20201117-111-423-25-50.dat", 
+                "20201117-111-473-25-50.dat")
+# ksr.conditions(2,3)
+#ksr.conditions(10:20)
 
 # Set what is to be done
 # what_to_do   = "fit" or "analysis"
