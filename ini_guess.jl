@@ -1,39 +1,43 @@
 """
 Adds columns to the df with initial guesses for a fitting parameter
 """
-function set_guess_par!(df::DataFrame; name::String, value,
-                    min::Float64   = -Inf,
-                    max::Float64   = Inf,
-                    var::Bool      = false,
-                    glbl::Bool     = false)
+function set_guess_pars!(df::DataFrame, par_guesses, kinetic_traces, mins, maxs, δs)
 
-    if !(name in [rate_constants; fit_parnames])
-        error("guess_par(): parameter "*name*" does not exist")
-    end
+    nrows = nrow(df)
 
-    if name in names(df)
-        error("guess_par(): duplicate parameter name "*name)
-    end
+    for r in par_guesses
 
-    if value isa Vector && size(value,1) != nrow(df)
-      error("guess_par():  length of values vector has to be equal to number of data files.")
-    end
-          
-    df[!,name] = [fitpar() for _ in 1:nrow(df)]
-
-    for i=1:nrow(df)
-        if value isa Vector#{Float64}
-            df[i,name].value = value[i]
-        elseif value isa Number
-            df[i,name].value = value
-        else
-            error("guess_par(): a value must be a number or a vector of numbers")
+        if !(r[:name] in fit_parnames)
+            error("parameter "*r[:name]*" does not exist")
         end
-        df[i,name].min   = min
-        df[i,name].max   = max
-        df[i,name].var   = var
-        df[i,name].glbl  = glbl
+
+        df[!,r[:name]] = [fitpar() for _ in 1:nrows]
+
+        for i=1:nrows
+            if r[:value] isa Number
+                df[i,r[:name]].value = r[:value]
+            elseif r[:value] isa Tuple
+                if r[:value][1] == "maxs"
+                    df[i,r[:name]].value = r[:value][2]*maxs[i][1]
+                elseif r[:value][1] isa Function
+                    df[i,r[:name]].value = 
+                        r[:value][1](r[:value][2], kinetic_traces[i], mins[i], maxs[i], δs[i])
+                else
+                    error("set_guess_par(): the 2nd element of a tuple must be either maxs or function")
+                end
+            else
+                error("set_guess_par(): a value must be a number or a tuple{number, string}")
+            end
+
+            haskey(r,:min) && (df[i,r[:name]].min = r[:min])
+            haskey(r,:max) && (df[i,r[:name]].max = r[:max])
+            haskey(r,:var) && (df[i,r[:name]].var = r[:var])
+            haskey(r,:glbl)&& (df[i,r[:name]].glbl= r[:glbl])
+        end
+        
     end
+
+          
                 
 end
 
@@ -67,24 +71,27 @@ end
 """
 Adds columns to the df with initial guesses for rate for a local fit
 """
-function set_guess_rate!(df::DataFrame; name::String, ν::Float64, ϵ::Float64, var::Bool)
+function set_guess_rate!(df::DataFrame, rate_guesses)
 
-    if !(name in rate_constants)
-        error("guess_rate(): parameter "*name*" does not exist")
-    end
+    nrows = nrow(df)
 
-    if name in names(df)
-        error("guess_rate(): duplicate parameter name "*name)
-    end
+    for r in rate_guesses
 
-    df[!,name] = [fitpar() for _ in 1:nrow(df)]
-    for i=1:nrow(df)
-        df[i,name].value = Arrhenius(df[i,:temperature], ν, ϵ)
-        df[i,name].var   = var
-        df[i,name].min   = df[i,name].value/1024.0
-        df[i,name].glbl  = false
-    end
+        if !(r[:name] in rate_constants)
+            error("parameter "*r[:name]*" does not exist")
+        end
+
+        df[!,r[:name]] = [fitpar() for _ in 1:nrows]
+
+        for i=1:nrows
+            df[i,r[:name]].value = Arrhenius(df[i,:temperature], r[:ν], r[:ϵ])
+            df[i,r[:name]].var   = r[:var]
+            df[i,r[:name]].min   = df[i,r[:name]].value/1024.0
+            df[i,r[:name]].glbl  = false
+        end
     
+    end
+
 end
 
 

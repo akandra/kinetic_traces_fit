@@ -32,11 +32,15 @@ ksr.conditions( "20170828-332-373-100-200.dat",
 
 # Set what is to be done
 # what_to_do   = "fit" or "analysis"
+# !!!Warning: consider replacing what_to_do with tag_hierarchy
 ksr.what_to_do("fit",      "rrr", "facet", "tag")
 ksr.what_to_do("analysis", "rrr", "facet", "tag")
 
 # Set maximum temperature for Arrhenius fits
 ksr.Arrh_Tmax(480.0)
+
+# Set kinetic trace data cutoff fraction
+ksr.cutoff_fraction("off")
 
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
@@ -48,13 +52,13 @@ ksr.guess_rate(name= "k3", ν=3.0*10^4,  ϵ=0.36, var=true)
 ksr.guess_rate(name= "k4", ν=1.0*10^6,  ϵ=0.75, var=false)
 ksr.guess_rate(name= "k5", ν=1.0*10^10, ϵ=0.5,  var=false)
 
-ksr.guess_par(name= "a",   value= (0.25,"maxs"), min=0.001, var=true, glbl=false)
+ksr.guess_par(name= "a",   value= ("maxs", 0.25), min=0.001, var=true, glbl=false)
 
 ksr.guess_par(name="t0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
 ksr.guess_par(name="f_tr", value=1e-3, min=0.0, var=true, glbl=false)
 ksr.guess_par(name="k_vac",value=1e-5, var=false, glbl=false)
 
-ksr.guess_par(name="baseline",value=(7,"baseline"), var=false, glbl=false)
+ksr.guess_par(name="baseline",value=(ksr.set_baseline,7), var=false, glbl=false)
 
 ksr.step_density(facet="332", value=1/6)
 ksr.step_density(facet="111", value=0.005)

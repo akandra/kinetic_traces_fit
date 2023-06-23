@@ -4,14 +4,14 @@
 fit_parnames = ["a", "t0", "f_tr", "k_vac", "baseline", "cutoff" ]
 
 # set initial values for baselines
-function set_baseline(ndata::Int)
+function set_baseline(shift::Int, kinetic_trace::Matrix{Float64}, 
+                                  mins::Tuple{Number,Number}, 
+                                  maxs::Tuple{Number,Number}, 
+                                  δs::Float64)
 
-    baseline = zeros(ndata)
-    for i=1:ndata
-        bl_range = findfirst( x -> x>mins[i][1]+δs[i]/2 ,kinetic_traces[i][1:maxs[i][2],2]) - 7
-        baseline[i] = mean(kinetic_traces[i][1:bl_range,2])
-    end
-    return baseline
+    bl_range = findfirst( x -> x>mins[1]+δs/2 , kinetic_trace[1:maxs[2],2]) - shift
+    return mean(kinetic_trace[1:bl_range,2])
+
 end 
 
 function fit_function()

@@ -40,6 +40,10 @@ what_to_do(args...) = (global wtd = args)
 T_cutoff::Number = Inf
 Arrh_Tmax(x::Number) = (global T_cutoff = x)
 
+# Set kinetic trace data cutoff fraction
+data_cutoff_fraction  = "off"
+cutoff_fraction(x) = (global data_cutoff_fraction = x)
+
 # initial guesses
 rate_guesses = []
 guess_rate(; kargs...) = push!(rate_guesses, kargs)

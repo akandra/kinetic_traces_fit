@@ -31,6 +31,15 @@ function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::
     # join above data frames
     df = innerjoin(df, dfcov, on = [:tag, :temperature, :rr_pump, :rr_cov])
 
-    return df
+    # create step density data frame
+    dfθs = DataFrame( facet =        [ k[:facet] for k in θs ],
+                      step_density = [ k[:value] for k in θs ])
+    # join to the total data frame
+    df = innerjoin(df,dfθs, on=:facet)
+
+    # create the occupancy factor data frame
+    dfocc = DataFrame(occ_factors)
+
+    return df, dfocc
 
 end

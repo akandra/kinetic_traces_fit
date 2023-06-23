@@ -53,5 +53,6 @@ include("create_df.jl")
 
 # do-it function
 include("do_it.jl")
+include("process.jl")
 
 end
