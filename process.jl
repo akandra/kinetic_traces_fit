@@ -1,4 +1,4 @@
-function process(df2fit::DataFrame)
+function process(df2fit::DataFrame, kinetic_traces::Vector{Matrix{Float64}})
         
     ndata = nrow(df2fit)
 
@@ -28,53 +28,54 @@ function process(df2fit::DataFrame)
         ydata1 = kinetic_traces[i][1:df2fit1[1,:cutoff],2]
 
         if wtd[1] == "fit"
-        # compose a vector of initial values, lower and upper bounds for the fitting parameters
-        pini1= Float64[]
-        plb1 = Float64[]
-        pub1 = Float64[]
-        for d in eachcol(df2fitpar1)
-        if d[1].var
-            push!(pini1, d[1].value)
-            push!(plb1 , d[1].min)
-            push!(pub1 , d[1].max)
-        end
-        end
-        H2OProdflg = [0]
-        @time push!(fit1, 
-        curve_fit( (x,p)->H2OProduction(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1,H2OProdflg), 
-                xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
-                lambda = 10,min_step_quality=1e-3, maxIter=1000))
-        best_fit_pars = fit1[i].param
-        println("Number of function calls: ",H2OProdflg)
-        println("Fit pars: ",fit1[i].param)
-        println("Done fitting date #",i," of ",ndata)
+            # compose a vector of initial values, lower and upper bounds for the fitting parameters
+            pini1= Float64[]
+            plb1 = Float64[]
+            pub1 = Float64[]
+            for d in eachcol(df2fitpar1)
+                if d[1].var
+                    push!(pini1, d[1].value)
+                    push!(plb1 , d[1].min)
+                    push!(pub1 , d[1].max)
+                end
+            end
+WE are here modifying H2OProduction function            
+            H2OProdflg = [0]
+            @time push!(fit1, 
+            curve_fit( (x,p)->H2OProduction(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1,H2OProdflg), 
+                    xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
+                    lambda = 10,min_step_quality=1e-3, maxIter=1000))
+            best_fit_pars = fit1[i].param
+            println("Number of function calls: ",H2OProdflg)
+            println("Fit pars: ",fit1[i].param)
+            println("Done fitting date #",i," of ",ndata)
 
 
-        # write out parameter-related data
-        open(results_path*df2fit[i,:].ktfname, "a") do io
-        write(io, "# initial guess\n")
-        writedlm(io, transpose(iguess[i,:]))
-        write(io,"# best fit\n")
-        writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
-        write(io,"# standard error\n")
-        sef = try 
-                stderror(fit1[i])
-            catch e
-                fill(NaN,length(fit1[i].param))
+            # write out parameter-related data
+            open(results_path*df2fit[i,:].ktfname, "a") do io
+            write(io, "# initial guess\n")
+            writedlm(io, transpose(iguess[i,:]))
+            write(io,"# best fit\n")
+            writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
+            write(io,"# standard error\n")
+            sef = try 
+                    stderror(fit1[i])
+                catch e
+                    fill(NaN,length(fit1[i].param))
+                end
+            se = zeros(ncol(df2fitpar))
+            j = 0
+            for d in 1:ncol(df2fitpar)
+                if df2fitpar[i,d].var
+                    j+=1
+                    se[d] = sef[j]
+                end
             end
-        se = zeros(ncol(df2fitpar))
-        j = 0
-        for d in 1:ncol(df2fitpar)
-            if df2fitpar[i,d].var
-                j+=1
-                se[d] = sef[j]
-            end
-        end
-        writedlm(io, transpose(se))
-        write(io, "# reduced χ²\n")
-        χ2 = sum(fit1[i].resid .^ 2)/(length(fit1[i].resid) - j)
-        writedlm(io, χ2)
-        end  
+            writedlm(io, transpose(se))
+            write(io, "# reduced χ²\n")
+            χ2 = sum(fit1[i].resid .^ 2)/(length(fit1[i].resid) - j)
+            writedlm(io, χ2)
+            end  
 
         elseif wtd[1] == "analysis"
         #%% 

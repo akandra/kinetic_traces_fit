@@ -41,7 +41,7 @@ function do_it()
     set_guess_rate!(df2fit, rate_guesses)
     set_guess_pars!(df2fit,  par_guesses, kinetic_traces, mins, maxs, δs)
 
-    process(df2fit)
+    process(df2fit, kinetic_traces)
 
     # if any parameter is global then do a fit to all the data simultaneously
     # dataset 1 is chosen, since all .glbl's are the same

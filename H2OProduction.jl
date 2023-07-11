@@ -44,15 +44,6 @@ function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
         end
     end
 
-    #--------------------------------------------------------------------------
-    # calculate the model function
-    #--------------------------------------------------------------------------
-    t0s       = [ df2fitpar.t0[i].value       for i in 1:ndata ]
-    as        = [ df2fitpar.a[i].value        for i in 1:ndata ]
-    baselines = [ df2fitpar.baseline[i].value for i in 1:ndata ]
-    f_trs     = [ df2fitpar.f_tr[i].value     for i in 1:ndata ]
-    k_vacs    = [ df2fitpar.k_vac[i].value    for i in 1:ndata ]
-
     flux=Float64[]
     for (i, d) in enumerate(data)
 
@@ -66,17 +57,8 @@ function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
         prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]) ,y0,tspan,rates )
         sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
         
-        normfactor = maximum(sol)
-        if normfactor == 0
-            append!(flux, as[i]*sol .+ baselines[i])
-        else
-    #        append!(flux, as[i]*(1.0 .+ f_trs[i]*exp.(-k_vacs[i]*(d[:,1] .- t0s[i]) ) ) .* sol/normfactor .+ baselines[i])
-            sol_acc = zeros(length(sol))
-            cumsum!(sol_acc, sol/normfactor)
-            #append!(flux, as[i]*(sol + f_trs[i]*exp.(-k_vacs[i]*(d[:,1] .- t0s[i])) .* sol_acc )/normfactor .+ baselines[i] )
-            append!(flux, as[i]*(sol/normfactor + f_trs[i]*exp.(-k_vacs[i]*(d[:,1] .- t0s[i])) .* sol_acc/sol_acc[end]) .+ baselines[i] )
-        end
-
+        append!(flux, fit_function(sol, df2fitpar[i:i,:], d[:,1]))
+NEXTTIME: modify H2OProduction function
     end
      
     return flux
