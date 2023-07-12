@@ -61,7 +61,7 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
             end
         end
         H2OProdflg = [0]
-        fit = curve_fit( (x,p)->H2OProduction(x, p, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg), 
+        fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
                         maxIter=1000)
         best_fit_pars = fit.param
@@ -136,7 +136,7 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
 
     # plotting data
     H2OProdflg = [0]
-    yfit = H2OProduction(0, best_fit_pars, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg)
+    yfit = product_flux(0, best_fit_pars, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg)
     
     # find global dataset characteristics
     ch_list = ["rrr", "facet", "tag"]

@@ -10,6 +10,7 @@ species = Dict("H₂"=>1, "O"=>2, "OH"=>3, "H"=>4, "H₂O"=>5)
 #rate_constants = Dict("k1"=>1, "km1"=>2, "k2"=>3, "k3"=>4, "k4"=>5, "k5"=>6)
 rate_constants = ["k1", "km1", "k2", "k3", "k4", "k5"]
 
+NEXTTIME: bring kinetic model function to the proper Base.format_bytes
 
 function eqns!(ydot,y,p,t, beampars, geompars)
 

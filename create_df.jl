@@ -23,10 +23,11 @@ function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::
     df = innerjoin(df,dfpump, on=:pump_file)
 
     # create initial coverage data frame
-    covdata = get_data(data_path, covfnames)
+    cov_name, covdata = get_data_cov(data_path, covfnames)
     tagscov = map( f->split( splitext(f)[1], delim)[1], covfnames )
     tags1 = vcat(fill.(tagscov,size.(covdata,1))...)
     dfcov = DataFrame(vcat(covdata...),[:temperature,:rr_pump,:rr_cov,:cov0])
+    dfcov[!,:cov_species] .= cov_name
     dfcov[!,:tag] = tags1
     # join above data frames
     df = innerjoin(df, dfcov, on = [:tag, :temperature, :rr_pump, :rr_cov])

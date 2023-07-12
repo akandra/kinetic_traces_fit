@@ -8,6 +8,9 @@ using LsqFit
 using Plots
 using Statistics: mean
 
+# debugging output tag
+debug_tag = 0
+
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
 
@@ -43,7 +46,7 @@ include("global_fit.jl")
 include("local_fit.jl")
 
 # function calculating the fitting function
-include("H2OProduction.jl")
+include("product_flux.jl")
 
 # function defining the kinetic model
 include("H2Pulse.jl")

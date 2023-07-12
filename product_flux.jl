@@ -1,7 +1,7 @@
 """
 Returns a vector of product fluxes calculated from a kinetic model
 
-flux_vector(x, p, df2fit, df2fitpar, data, ndata, flg)
+product_flux(x, p, df2fit, df2fitpar, data, ndata, flg)
 
 x is dummy argument for curve_fit function !!! Consider to get rid of it
 
@@ -23,7 +23,7 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
                     selectors defines grouping (can be empty)
 
 """
-function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
+function product_flux(x, p, df2fit, df2fitpar, data, ndata, flg)
 
     flg[1] += 1
     # update the values of variable parameters in df2fitpar
@@ -47,18 +47,21 @@ function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
     flux=Float64[]
     for (i, d) in enumerate(data)
 
-        y0 = [0.0, df2fit.Oini[i], 0.0, 0.0, 0.0]
+        # initialize concentrations
+        y0 = zeros(Float64,length(species))
+        # get concentration of coverage species
+        y0[ species[df2fit.cov_species[i]] ] =  df2fit.cov0[i]
+
+        # WARNING: think of something better than 200.0
         tspan = ( d[begin,1], d[end,1] + 200.0 ) #.- t0s[i]
 
-        νs = [ df2fitpar[:, r][i].value for r in [:ν1,:νm1,:ν2,:ν3,:ν4,:ν5] ]
-        ϵs = [ df2fitpar[:, r][i].value for r in [:ϵ1,:ϵm1,:ϵ2,:ϵ3,:ϵ4,:ϵ5] ]
-        rates = Arrhenius.( df2fit.temperature[i], νs, ϵs)
+        # get values for rate constants
+        rates = [ df2fitpar[:,r][i].value for r in rate_constants]
 
-        prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]) ,y0,tspan,rates )
+        prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]), y0, tspan, rates )
         sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
         
         append!(flux, fit_function(sol, df2fitpar[i:i,:], d[:,1]))
-NEXTTIME: modify H2OProduction function
     end
      
     return flux

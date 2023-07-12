@@ -28,7 +28,7 @@ function local_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess;
             end
             H2OProdflg = [0]
             @time push!(fit1, 
-                curve_fit( (x,p)->H2OProduction(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1,H2OProdflg), 
+                curve_fit( (x,p)->product_flux(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1,H2OProdflg), 
                         xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
                         lambda = 10,min_step_quality=1e-3, maxIter=1000))
             best_fit_pars = fit1[i].param
@@ -90,7 +90,7 @@ function local_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess;
         
         # plotting individual kinetic trace i together with the local fit to it
         H2OProdflg = [0]
-        yfit1 = H2OProduction(0, best_fit_pars, df2fit1, df2fitpar1, 
+        yfit1 = product_flux(0, best_fit_pars, df2fit1, df2fitpar1, 
                              [kinetic_traces[i]],1,H2OProdflg)
         
         fbase= split(df2fit.ktfname[i],".")[1]
