@@ -10,9 +10,8 @@ species = Dict("H₂"=>1, "O"=>2, "OH"=>3, "H"=>4, "H₂O"=>5)
 #rate_constants = Dict("k1"=>1, "km1"=>2, "k2"=>3, "k3"=>4, "k4"=>5, "k5"=>6)
 rate_constants = ["k1", "km1", "k2", "k3", "k4", "k5"]
 
-NEXTTIME: bring kinetic model function to the proper Base.format_bytes
-
-function eqns!(ydot,y,p,t, beampars, geompars)
+# For the future: make it possible to use any name for the function
+function kin_model!(ydot,y,p,t, beampars, θs)
 
     # All-step model from Theo (everything occurs on steps)
     # (1)  H₂ + O <- km1, k1 -> OH + H
@@ -21,14 +20,26 @@ function eqns!(ydot,y,p,t, beampars, geompars)
     # (4)  H + H  -k4> H₂ 
     # (2)  H₂O -k5> H₂O(gas)  
 
-    θ_s, σO, σOH, σH2O, σH  = geompars
+    iH   = species["H"]
+    iH2  = species["H₂"]
+    iH2O = species["H₂O"]
+    iO   = species["O"]
+    iOH  = species["OH"]
+
+    σO   = occ_factors["O"]
+    σOH  = occ_factors["OH"]
+    σH2O = occ_factors["H₂O"]
+    σH   = occ_factors["H"]
+
     κ1, κm1, κ2, κ3, κ4, κ5 = p
+
     a, fwhm, tcenter        = beampars
     
-    ydot[1] = -κ1*y[1]*y[2]*θ_s/σO + θ_s*κ4*y[3]*y[3]/(σH*σH) + θ_s*κm1*y[3]*y[4]/(σH*σOH) + θ_s*H2Pulse(t,a,fwhm,tcenter)
-    ydot[2] = -κ1*y[1]*y[2] + κm1*y[3]*y[4]*σO/(σH*σOH) +  κ3*y[4]*y[4]*σO/(σOH*σOH)
-    ydot[3] =  κ1*y[1]*y[2]/σO - 2.0*κ4*y[3]*y[3]/σH - κ2*y[3]*y[4]/σOH - κm1*y[3]*y[4]/σOH
-    ydot[4] =  κ1*y[1]*y[2]/σO - κ2*y[3]*y[4]/σH - κm1*y[3]*y[4]/σH - 2.0*κ3*y[4]*y[4]/σOH
-    ydot[5] =  κ2*y[3]*y[4]*σH2O/(σH*σOH) + κ3*y[4]*y[4]*σH2O/(σOH*σOH) - κ5*y[5]   
+
+    ydot[iH2] = -κ1*y[iH2]*y[iO]*θs/σO + θs*κ4*y[iOH]*y[iOH]/(σH*σH) + θs*κm1*y[iOH]*y[iH]/(σH*σOH) + θs*H2Pulse(t,a,fwhm,tcenter)
+    ydot[iO]  = -κ1*y[iH2]*y[iO] + κm1*y[iOH]*y[iH]*σO/(σH*σOH) +  κ3*y[iH]*y[iH]*σO/(σOH*σOH)
+    ydot[iOH] =  κ1*y[iH2]*y[iO]/σO - 2.0*κ4*y[iOH]*y[iOH]/σH - κ2*y[iOH]*y[iH]/σOH - κm1*y[iOH]*y[iH]/σOH
+    ydot[iH]  =  κ1*y[iH2]*y[iO]/σO - κ2*y[iOH]*y[iH]/σH - κm1*y[iOH]*y[iH]/σH - 2.0*κ3*y[iH]*y[iH]/σOH
+    ydot[iH2O]=  κ2*y[iOH]*y[iH]*σH2O/(σH*σOH) + κ3*y[iH]*y[iH]*σH2O/(σOH*σOH) - κ5*y[iH2O]   
 
 end

@@ -63,9 +63,11 @@ ksr.guess_par(name="baseline",value=(ksr.set_baseline,7), var=false, glbl=false)
 ksr.step_density(facet="332", value=1/6)
 ksr.step_density(facet="111", value=0.005)
 
-ksr.occupancies(species="O",   step=2, terrace=2)
-ksr.occupancies(species="H",   step=1, terrace=1)
-ksr.occupancies(species="OH",  step=1, terrace=1)
-ksr.occupancies(species="H₂O", step=1, terrace=1)
+ksr.occupancies(species=  "O", value=2)
+ksr.occupancies(species=  "H", value=1)
+ksr.occupancies(species= "OH", value=1)
+ksr.occupancies(species="H₂O", value=1)
+
+ksr.products("H₂O")
 
 ksr.do_it()

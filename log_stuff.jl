@@ -51,8 +51,12 @@ guess_rate(; kargs...) = push!(rate_guesses, kargs)
 par_guesses = []
 guess_par(; kargs...) = push!(par_guesses, kargs)
 
-occ_factors = []
-occupancies(; kargs...) = push!(occ_factors, kargs)
+occ_factors = Dict{String, Int}()
+occupancies(; kargs...) = occ_factors[kargs[:species]] = kargs[:value]
 
 θs = []
 step_density(; kargs...) = push!(θs, kargs)
+
+product_species::String = ""
+products(s::String) = (global product_species = s)
+

@@ -9,7 +9,7 @@ using Plots
 using Statistics: mean
 
 # debugging output tag
-debug_tag = 0
+debug = 0
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar

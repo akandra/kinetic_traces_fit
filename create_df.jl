@@ -19,7 +19,7 @@ function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::
     df[!,:pump_file] = tags[1] .* (delim * pump_sfx * ".dat")
 
     # create pump-pulse data frame
-    dfpump = DataFrame( pump_file = pumpfnames, pumppars = get_pump_beam(pumpfnames) )
+    dfpump = get_pump_beam(pumpfnames)
     df = innerjoin(df,dfpump, on=:pump_file)
 
     # create initial coverage data frame
@@ -38,9 +38,6 @@ function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::
     # join to the total data frame
     df = innerjoin(df,dfθs, on=:facet)
 
-    # create the occupancy factor data frame
-    dfocc = DataFrame(occ_factors)
-
-    return df, dfocc
+    return df
 
 end

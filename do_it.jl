@@ -1,7 +1,7 @@
 function do_it()
 
     # create dataframe
-    df, dfocc = create_df(data_path, fn_delim, fn_pump_sfx, fn_cov_sfx)
+    df = create_df(data_path, fn_delim, fn_pump_sfx, fn_cov_sfx)
 
     df2fit = df
     # apply data selection conditions
@@ -40,7 +40,7 @@ function do_it()
     # add fit parameters to data frame
     set_guess_rate!(df2fit, rate_guesses)
     set_guess_pars!(df2fit,  par_guesses, kinetic_traces, mins, maxs, δs)
-
+global debug = df2fit
     process(df2fit, kinetic_traces)
 
     # if any parameter is global then do a fit to all the data simultaneously

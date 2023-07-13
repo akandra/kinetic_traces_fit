@@ -1,7 +1,7 @@
 """
 Gets the parameters related to the best local fit
 
-get_results_local(path_to_the_data::AbstractString, local_fit_filename::AbstractString)
+get_results_local(fit_filename::AbstractString)
 
 Returns:
 
@@ -9,16 +9,16 @@ a tuple of initial guesses, best fit parameters, standard error and χ2 for the 
 if local_fit_filename exists
 otherwise nothing
 """
-function get_results_local(path, filename; crit = "best")
+function get_results_local(filename; crit = "best")
 
-    if isfile(path*filename)
+    if isfile(filename)
 
         ini_guess = Float64[]
         best_fit  = Float64[]
         se        = Float64[]
         chi2      = Float64
 
-        data = readdlm(path*filename,comments=true) 
+        data = readdlm(filename,comments=true) 
         if crit == "best" 
             chi2ind = argmin(data[4:4:end,1])  # get the fit with minimal chi2
         elseif crit == "last" 

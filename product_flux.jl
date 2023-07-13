@@ -58,8 +58,8 @@ function product_flux(x, p, df2fit, df2fitpar, data, ndata, flg)
         # get values for rate constants
         rates = [ df2fitpar[:,r][i].value for r in rate_constants]
 
-        prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]), y0, tspan, rates )
-        sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
+        prob = ODEProblem( (ydot,y,r,t) -> kin_model!(ydot,y,r,t, df2fit.pumppars[i], df2fit.step_density[i]), y0, tspan, rates )
+        sol = solve(prob,abstol=1e-14)(d[:,1] .- df2fitpar.t0[i].value)[species[product_species],:]
         
         append!(flux, fit_function(sol, df2fitpar[i:i,:], d[:,1]))
     end
