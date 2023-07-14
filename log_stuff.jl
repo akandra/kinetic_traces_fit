@@ -9,7 +9,11 @@ path_to_data(str::String, folder::String)  = (global data_path = joinpath(folder
 model_path = "./"
 path_to_model(str::String) = (global model_path = joinpath(path, str))
 path_to_model(str::String, folder::String) = (global model_path = joinpath(folder, str))
-model(str::String) = include(joinpath(model_path,str)*".jl")
+rate_constants = String[]
+function model(str::String)
+    include(joinpath(model_path,str)*".jl")
+    global rate_constants = rate_constants_base .* rate_constants_sfx
+end
 
 fit_path   = "./"
 path_to_fit_function(str::String) = (global fit_path = joinpath(path, str))
@@ -47,6 +51,12 @@ cutoff_fraction(x) = (global data_cutoff_fraction = x)
 # initial guesses
 rate_guesses = []
 guess_rate(; kargs...) = push!(rate_guesses, kargs)
+
+Arrh_guesses = []
+guess_Arrh(; kargs...) = push!(Arrh_guesses, kargs)
+
+guesses = []
+guess(; kargs...) = push!(guesses, kargs)
 
 par_guesses = []
 guess_par(; kargs...) = push!(par_guesses, kargs)

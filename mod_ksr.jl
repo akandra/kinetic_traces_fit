@@ -42,20 +42,16 @@ include("get_results_local.jl")
 include("get_results_global.jl")
 
 # functions doing fits
-include("global_fit.jl")
-include("local_fit.jl")
+include("do_local_fit.jl")
+include("do_global_fit.jl")
 
 # function calculating the fitting function
 include("product_flux.jl")
-
-# function defining the kinetic model
-include("H2Pulse.jl")
 
 # function creating the dataframe
 include("create_df.jl")
 
 # do-it function
 include("do_it.jl")
-include("process.jl")
 
 end

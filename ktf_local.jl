@@ -45,17 +45,17 @@ ksr.cutoff_fraction("off")
 # set initial values for the fitting parameters and other defaults
 # units: μs⁻¹ for prefactors and rates; eV for energy
 
-ksr.guess_rate(name= "k1", ν=1.0*10^5,  ϵ=0.2,  var=false)
-ksr.guess_rate(name="km1", ν=1.0*10^5,  ϵ=2.0,  var=false)
-ksr.guess_rate(name= "k2", ν=1.0*10^5,  ϵ=0.4,  var=false)
-ksr.guess_rate(name= "k3", ν=3.0*10^4,  ϵ=0.36, var=true)
-ksr.guess_rate(name= "k4", ν=1.0*10^6,  ϵ=0.75, var=false)
-ksr.guess_rate(name= "k5", ν=1.0*10^10, ϵ=0.5,  var=false)
+ksr.guess_rate(sfx = "1", ν=1.0*10^5,  ϵ=0.2,  var=false)
+ksr.guess_rate(sfx ="m1", ν=1.0*10^5,  ϵ=2.0,  var=false)
+ksr.guess_rate(sfx = "2", ν=1.0*10^5,  ϵ=0.4,  var=false)
+ksr.guess_rate(sfx = "3", ν=3.0*10^4,  ϵ=0.36, var=true)
+ksr.guess_rate(sfx = "4", ν=1.0*10^6,  ϵ=0.75, var=false)
+ksr.guess_rate(sfx = "5", ν=1.0*10^10, ϵ=0.5,  var=false)
 
 ksr.guess_par(name= "a",   value= ("maxs", 0.25), min=0.001, var=true, glbl=false)
 
-ksr.guess_par(name="t0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
-ksr.guess_par(name="f_tr", value=1e-3, min=0.0, var=true, glbl=false)
+ksr.guess_par(name="t_0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
+ksr.guess_par(name="f_t", value=1e-3, min=0.0, var=true, glbl=false)
 ksr.guess_par(name="k_vac",value=1e-5, var=false, glbl=false)
 
 ksr.guess_par(name="baseline",value=(ksr.set_baseline,7), var=false, glbl=false)

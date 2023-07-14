@@ -8,7 +8,8 @@
 species = Dict("H₂"=>1, "O"=>2, "OH"=>3, "H"=>4, "H₂O"=>5)
 
 #rate_constants = Dict("k1"=>1, "km1"=>2, "k2"=>3, "k3"=>4, "k4"=>5, "k5"=>6)
-rate_constants = ["k1", "km1", "k2", "k3", "k4", "k5"]
+rate_constants_base = "k"
+rate_constants_sfx = ["1", "m1", "2", "3", "4", "5"]
 
 # For the future: make it possible to use any name for the function
 function kin_model!(ydot,y,p,t, beampars, θs)
@@ -36,7 +37,7 @@ function kin_model!(ydot,y,p,t, beampars, θs)
     a, fwhm, tcenter        = beampars
     
 
-    ydot[iH2] = -κ1*y[iH2]*y[iO]*θs/σO + θs*κ4*y[iOH]*y[iOH]/(σH*σH) + θs*κm1*y[iOH]*y[iH]/(σH*σOH) + θs*H2Pulse(t,a,fwhm,tcenter)
+    ydot[iH2] = -κ1*y[iH2]*y[iO]*θs/σO + θs*κ4*y[iOH]*y[iOH]/(σH*σH) + θs*κm1*y[iOH]*y[iH]/(σH*σOH) + θs*pump_pulse(t,a,fwhm,tcenter)
     ydot[iO]  = -κ1*y[iH2]*y[iO] + κm1*y[iOH]*y[iH]*σO/(σH*σOH) +  κ3*y[iH]*y[iH]*σO/(σOH*σOH)
     ydot[iOH] =  κ1*y[iH2]*y[iO]/σO - 2.0*κ4*y[iOH]*y[iOH]/σH - κ2*y[iOH]*y[iH]/σOH - κm1*y[iOH]*y[iH]/σOH
     ydot[iH]  =  κ1*y[iH2]*y[iO]/σO - κ2*y[iOH]*y[iH]/σH - κm1*y[iOH]*y[iH]/σH - 2.0*κ3*y[iH]*y[iH]/σOH

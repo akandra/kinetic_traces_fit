@@ -1,20 +1,4 @@
 # Built-In Fitting Model
-
-# Set the names for fit parameter dataframe columns
-fit_parnames = ["a", "t0", "f_tr", "k_vac", "baseline", "cutoff" ]
-
-# set initial values for baselines
-function set_baseline(shift::Int, kinetic_trace::Matrix{Float64}, 
-                                  mins::Tuple{Number,Number}, 
-                                  maxs::Tuple{Number,Number}, 
-                                  δs::Float64)
-
-    bl_range = findfirst( x -> x>mins[1]+δs/2 , kinetic_trace[1:maxs[2],2]) - shift
-    return mean(kinetic_trace[1:bl_range,2])
-
-end 
-
-
 """
 Returns a product flux calculated with a fitting function based on solution to the kinetic model
 
@@ -43,15 +27,22 @@ c(t) = int_0^t x(t) is the amount of product produced to the time instant t
 b is a baseline value
 
 """
-function fit_function(sol::Vector{Float64} ,dfpar::DataFrame, times::Vector{Float64})
+# Set the names for fit parameter dataframe columns
+fit_parnames = ["a", "t_0", "f_t", "k_vac", "baseline", "cutoff" ]
+
+function fit_function(ODEsol, dfpar::DataFrame, times::Vector{Float64})
 
     # get values of fitting parameters from the data frame
+    # NB: the names have to be consistent with fit_parnames
 
-    t0       = dfpar.t0[1].value
-    a        = dfpar.a[1].value
-    baseline = dfpar.baseline[1].value
-    f_tr     = dfpar.f_tr[1].value
-    k_vac    = dfpar.k_vac[1].value
+    t0       = dfpar[1,"t_0"].value
+    a        = dfpar[1,"a"].value
+    baseline = dfpar[1,"baseline"].value
+    f_tr     = dfpar[1,"f_t"].value
+    k_vac    = dfpar[1,"k_vac"].value
+
+    # produce a solution vector for a product
+    sol = ODEsol(times .- t0)[species[product_species],:]
 
     # define the model function
 
@@ -65,3 +56,15 @@ function fit_function(sol::Vector{Float64} ,dfpar::DataFrame, times::Vector{Floa
     end
 
 end
+
+# set initial values for baselines
+function set_baseline(shift::Int, kinetic_trace::Matrix{Float64}, 
+    mins::Tuple{Number,Number}, 
+    maxs::Tuple{Number,Number}, 
+    δs::Float64)
+
+bl_range = findfirst( x -> x>mins[1]+δs/2 , kinetic_trace[1:maxs[2],2]) - shift
+return mean(kinetic_trace[1:bl_range,2])
+
+end 
+
