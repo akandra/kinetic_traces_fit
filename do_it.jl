@@ -43,7 +43,8 @@ function do_it()
 
     # select df2fit columns of type fitpar preserving the binding by using "!"
 global debug = df2fit
-    df2fitpar = df2fit[!,names(df2fit, fitpar)]
+    fitpar_columns = setdiff( names(df2fit, fitpar), filter(x -> df2fit[1,x].glbl,rate_constants) )
+    df2fitpar = df2fit[!,fitpar_columns]
 
     # save initial guesses
     iguess = zeros(nrow(df2fitpar), ncol(df2fitpar))

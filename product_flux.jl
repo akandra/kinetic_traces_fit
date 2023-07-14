@@ -23,7 +23,7 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
                     selectors defines grouping (can be empty)
 
 """
-function product_flux(x, p, df2fit, df2fitpar, data, ndata, flg, global_call)
+function product_flux(x, p, df2fit, df2fitpar, data, ndata, flg)
 
     flg[1] += 1
     # update the values of variable parameters in df2fitpar
@@ -56,11 +56,7 @@ function product_flux(x, p, df2fit, df2fitpar, data, ndata, flg, global_call)
         tspan = ( d[begin,1], d[end,1] + 200.0 ) #.- t0s[i]
 
         # get values for rate constants
-        if global_call
-            
-        else
-            rates = [ df2fitpar[:,r][i].value for r in rate_constants]
-        end
+        rates = [ df2fit[:,r][i].value for r in rate_constants]
 
         prob = ODEProblem( (ydot,y,r,t) -> kin_model!(ydot,y,r,t, df2fit.pumppars[i], df2fit.step_density[i]), y0, tspan, rates )
         sol = solve(prob,abstol=1e-14)

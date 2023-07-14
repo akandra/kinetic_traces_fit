@@ -44,6 +44,7 @@ function set_guess_Arrh!(df::DataFrame)
 
     for r in Arrh_guesses
 
+        kname = rate_constants_base*r[:sfx]
         νname = "ν"*r[:sfx]
         ϵname = "ϵ"*r[:sfx]
     
@@ -51,10 +52,14 @@ function set_guess_Arrh!(df::DataFrame)
             error("parameter with suffix "*r[:sfx]*" does not exist")
         end
 
+        df[!,kname] = [fitpar() for _ in 1:nrows]
         df[!,νname] = [fitpar() for _ in 1:nrows]
         df[!,ϵname] = [fitpar() for _ in 1:nrows]
     
         for i=1:nrows
+
+            df[i,kname].value = Arrhenius(df[i,:temperature], r[:ν], r[:ϵ])
+            df[i,kname].glbl  = true
 
             df[i,νname].value = r[:ν]
             df[i,ϵname].value = r[:ϵ]
