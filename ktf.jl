@@ -8,7 +8,7 @@ import .Kinetics_of_Surface_Reactions as ksr
 path         = "../../Dropbox/Kinetics of Surface Reactions/"
 data_path = 
 data_path    = path * "data/"
-results_path = path * "results/" * "nu3_1/"
+results_path = path * "results/" * "nu3/"
 
 # create dataframe
 df = ksr.create_df(data_path)
@@ -45,7 +45,7 @@ kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 # fit_is_local = true or false
 # what_to_do   = "fit" or "analysis"
 
-fit_is_local = false
+fit_is_local = true
 what_to_do = ("fit",      "rrr", "facet", "tag")
 #what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
