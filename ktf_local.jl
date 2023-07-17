@@ -21,9 +21,9 @@ ksr.cov_sfx("Oini")
 
 # set conditions selecting data
 # ksr.conditions( :rrr => ==(2) )
-ksr.conditions( "20170828-332-373-100-200.dat", 
-                "20170828-332-423-100-200.dat", 
-                "20170828-332-473-100-200.dat",
+ksr.conditions( #"20170828-332-373-100-200.dat", 
+                #"20170828-332-423-100-200.dat", 
+                #"20170828-332-473-100-200.dat",
                 "20201117-111-373-25-50.dat", 
                 "20201117-111-423-25-50.dat", 
                 "20201117-111-473-25-50.dat")
@@ -34,7 +34,7 @@ ksr.conditions( "20170828-332-373-100-200.dat",
 # what_to_do   = "fit" or "analysis"
 # !!!Warning: consider replacing what_to_do with tag_hierarchy
 ksr.what_to_do("fit",      "rrr", "facet", "tag")
-ksr.what_to_do("analysis", "rrr", "facet", "tag")
+#ksr.what_to_do("analysis", "rrr", "facet", "tag")
 
 # Set maximum temperature for Arrhenius fits
 ksr.Arrh_Tmax(480.0)

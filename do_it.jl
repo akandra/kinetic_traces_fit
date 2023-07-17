@@ -42,7 +42,6 @@ function do_it()
     set_guess_pars!(df2fit,  par_guesses, kinetic_traces, mins, maxs, δs)
 
     # select df2fit columns of type fitpar preserving the binding by using "!"
-global debug = df2fit
     fitpar_columns = setdiff( names(df2fit, fitpar), filter(x -> df2fit[1,x].glbl,rate_constants) )
     df2fitpar = df2fit[!,fitpar_columns]
 
