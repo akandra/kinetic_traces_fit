@@ -45,7 +45,7 @@ kinetic_traces, maxs, mins, δs = ksr.load_kinetic_traces(df2fit,data_path)
 # fit_is_local = true or false
 # what_to_do   = "fit" or "analysis"
 
-fit_is_local = true
+fit_is_local = false
 what_to_do = ("fit",      "rrr", "facet", "tag")
 #what_to_do = ("analysis", "rrr", "facet", "tag")
 T_cutoff = 480.0 # max temperature for Arrhenius fit
@@ -108,10 +108,10 @@ if fit_is_local
         for i=1:ndata
     
             # get initial guesses from local fit if it exists
-            data = get_results_local(results_path, df2fit[i,:ktfname],crit="best")
+            data = ksr.get_results_local(results_path, df2fit[i,:ktfname],crit="best")
             if !isnothing(data)
                 # put the values into the dataframe
-                for (j,p) in enumerate(names(df2fit,fitpar))
+                for (j,p) in enumerate(names(df2fit,ksr.fitpar))
                     if p == "a"
                         df2fit[i,p].value = data[2][j]
                         df2fit[i,p].min   = 0.001
