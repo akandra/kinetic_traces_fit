@@ -48,7 +48,7 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
         end
 
         call_counts = [0]
-        fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
+        @time fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
                         maxIter=1000)
         best_fit_pars = fit.param
