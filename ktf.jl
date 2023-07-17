@@ -8,7 +8,7 @@ import .Kinetics_of_Surface_Reactions as ksr
 path         = "../../Dropbox/Kinetics of Surface Reactions/"
 data_path = 
 data_path    = path * "data/"
-results_path = path * "results/" * "nu3/"
+results_path = path * "results/" * "nu3_1/"
 
 # create dataframe
 df = ksr.create_df(data_path)
