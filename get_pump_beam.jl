@@ -18,12 +18,12 @@ function get_pump_beam(fnames)
 end
 
 function pump_pulse(t::Float64, a::Vector{Float64}, fwhm::Vector{Float64}, tcenter::Vector{Float64})
-
-    sigma = fwhm / ( 2.0*sqrt(2.0*log(2.0)) )
     
-    gausses = 0
-    for i=1:3
-        gausses = gausses + a[i]/(sqrt(2*π)*sigma[i])*exp( -(t - tcenter[i])^2/(2*sigma[i]^2) )
+    factor::Float64 = 1.0 / ( 2.0*sqrt(2.0*log(2.0)) )
+    
+    gausses::Float64 = 0.0
+    for i::Int=1:3
+        gausses = gausses + a[i]/(sqrt(2*π)*fwhm[i]*factor)*exp( -(t - tcenter[i])^2/(2*(fwhm[i]*factor)^2) )
     end
 
     return gausses

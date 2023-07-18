@@ -26,7 +26,7 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
         # number of data sets
         ndata = nrow(df2fit)
 
-        print("Do global fit on ", ndata, " data sets...")
+        println("Do global fit on ", ndata, " data sets...")
 
         # compose x and y data for curve_fit
         xdata = collect(Iterators.flatten([ kt[:,1] for kt in kinetic_traces ]))
@@ -46,11 +46,11 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
                 end
             end
         end
-
+        
         call_counts = [0]
         @time fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
-                        maxIter=1000)
+                        maxIter=1000, show_trace = true)
         best_fit_pars = fit.param
 
         println(" It took ", call_counts[1], " function calls.")
@@ -70,6 +70,7 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
                 writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
             end
             write(io,"# standard error\n")
+
             sef = try 
                     stderror(fit)
                 catch e
