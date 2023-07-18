@@ -39,7 +39,7 @@ function H2OProduction(x, p, df2fit, df2fitpar, data, ndata, flg)
         rates = Arrhenius.( df2fit.temperature[i], νs, ϵs)
 
         prob = ODEProblem( (ydot,y,r,t) -> eqns!(ydot,y,r,t, df2fit.beampars[i], df2fit.geompars[i]) ,y0,tspan,rates )
-        @time sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
+        sol = solve(prob,abstol=1e-14)(d[:,1] .- t0s[i])[5,:]
         
         normfactor = maximum(sol)
         if normfactor == 0
