@@ -46,13 +46,13 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
                 end
             end
         end
-        
+println(pini)        
         call_counts = [0]
         @time fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
                         maxIter=1000, show_trace = true)
         best_fit_pars = fit.param
-
+global debug = fit
         println(" It took ", call_counts[1], " function calls.")
 #        println("Fit pars: ",fit.param)
 

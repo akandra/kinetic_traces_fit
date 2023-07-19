@@ -71,7 +71,11 @@ end
 #NEXTTIME: adjust the kt files and the df to our new understanding the things    
 # Consider for the future development
 #
-# 1. Put all references to the df into the ksr-module
+# 1. Consider cleaning up the code:
+#        - adjust set_guess() to eliminate ambiguities
+#        - eliminating df2fitpar data frame
+#        - eliminating tests based upon names of parameters 
+#          by, for example, including additional fields into fitpar structure 
 # 2. Change the way how the kinetic traces files are named and supplied with ancillary info.
 #    Consider 3 ways of doing that:
 #        - create a single ancillary file

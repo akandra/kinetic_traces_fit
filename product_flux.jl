@@ -43,6 +43,17 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
         end
     end
 
+    # update rate constants for Arrhenius fitting parameters
+    for s in rate_constants_sfx
+        if df2fit[1,rate_constants_base*s].glbl
+            for i in 1:ndata
+                df2fit[i,rate_constants_base*s].value = 
+                    Arrhenius(df2fit[i,:temperature], df2fitpar[1,"ν"*s].value, df2fitpar[1,"ϵ"*s].value)
+            end
+        end
+    end
+
+
     flux=Float64[]
     for (i, d) in enumerate(data)
 
@@ -59,6 +70,7 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
 
         prob = ODEProblem( (ydot,y,r,t) -> kin_model!(ydot,y,r,t, df2fit.pumppars[i], df2fit.step_density[i]), y0, tspan, rates )
         sol = solve(prob,abstol=1e-14)
+    
         append!(flux, fit_function(sol, df2fitpar[i:i,:], d[:,1]))
     end
 

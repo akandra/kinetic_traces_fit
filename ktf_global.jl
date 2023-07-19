@@ -21,15 +21,15 @@ ksr.cov_sfx("Oini")
 
 # set conditions selecting data
 # ksr.conditions( :rrr => ==(2) )
-ksr.conditions( #"20170828-332-373-100-200.dat", 
-                #"20170828-332-423-100-200.dat", 
-                #"20170828-332-473-100-200.dat",
+ksr.conditions( "20170828-332-373-100-200.dat", 
+                "20170828-332-423-100-200.dat", 
+                "20170828-332-473-100-200.dat",
                 "20201117-111-373-25-50.dat", 
                 "20201117-111-423-25-50.dat", 
                 "20201117-111-473-25-50.dat"
                 )
 # ksr.conditions(2,3)
-#ksr.conditions(10:20)
+ksr.conditions(6:6)
 
 # Set what is to be done
 # what_to_do   = "fit" or "analysis"
@@ -50,15 +50,15 @@ ksr.guess_rate(sfx = "1", ν=1.0*10^5,  ϵ=0.2, var=false)
 ksr.guess_rate(sfx ="m1", ν=1.0*10^5,  ϵ=2.0, var=false)
 ksr.guess_rate(sfx = "2", ν=1.0*10^5,  ϵ=0.4, var=false)
 #ksr.guess_Arrh(sfx = "3", ν=3.0*10^4, ϵ=0.36, var=true)
-ksr.guess_Arrh(sfx = "3", ν=4.4204050640348025e6, ϵ=0.5327034287892817, var=true)
+ksr.guess_Arrh(sfx = "3", ν=4.42e4, ϵ=0.533, var=true)
 ksr.guess_rate(sfx = "4", ν=1.0*10^6,  ϵ=0.75,var=false)
 ksr.guess_rate(sfx = "5", ν=1.0*10^10, ϵ=0.5, var=false)
 #ksr.guess(sfx = "3", ν=3.0*10^4, var_ν=true, glbl_ν = true, ϵ=0.36, var_ϵ=false, glbl_ϵ = true)
 
-ksr.guess_par(name= "a",   value= ("maxs", 1.0), min=0.001, var=false, glbl=false)
+ksr.guess_par(name= "a",   value= ("maxs", 1.0), min=0.001, var=true, glbl=false)
 
-ksr.guess_par(name="t_0",   value=-100,  min=-200.0, max=200.0, var=false, glbl=false)
-ksr.guess_par(name="f_t", value=1e-3, min=0.0, var=false, glbl=false)
+ksr.guess_par(name="t_0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
+ksr.guess_par(name="f_t", value=1e-3, min=0.0, var=true, glbl=false)
 ksr.guess_par(name="k_vac",value=1e-5, var=false, glbl=false)
 
 ksr.guess_par(name="baseline",value=(ksr.set_baseline,7), var=false, glbl=false)
