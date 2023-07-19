@@ -60,10 +60,12 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
                 end
             end
         end
+println(pini)
         H2OProdflg = [0]
         @time fit = curve_fit( (x,p)->H2OProduction(x, p, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
-                        maxIter=1000)
+                        maxIter=1000, show_trace=true)
+
         best_fit_pars = fit.param
 
         println(" It took ", H2OProdflg[1], " function calls.")

@@ -23,7 +23,7 @@ ktfnames = [
             "20201117-111-473-25-50.dat"
            ]
 
-condition = df.ktfname .∈ [ktfnames[4:6]]
+condition = df.ktfname .∈ [ktfnames[6:6]]
 #df2fit = filter( :ktfname => in(ktfnames),df)
 #condition = (df.rrr .== 2) # .| (df.rrr .== 8.0)
 #condition = (df.tag .!= "20201103") .| (df.tag .!= "20201118") 
@@ -100,7 +100,7 @@ if fit_is_local
         ksr.ini_guess!(df2fit,"m1", ν_theoguess[2], false, false, ϵ_theoguess[2], false, false)
         ksr.ini_guess!(df2fit, "2", ν_theoguess[3], false, false, ϵ_theoguess[3], false, false)
         ksr.ini_guess!(df2fit, "3", ν_theoguess[4],  true,  true, ϵ_theoguess[4],  true,  true)
-        ksr.ini_guess!(df2fit, "3", 4.4204050640348025e7,  true,  true, 0.5327034287892817,  true,  true)
+        ksr.ini_guess!(df2fit, "3", 4.42e4,  true,  true, 0.533,  true,  true)
         ksr.ini_guess!(df2fit, "4", ν_theoguess[5], false, false, ϵ_theoguess[5], false, false)
         ksr.ini_guess!(df2fit, "5", ν_theoguess[6], false, false, ϵ_theoguess[6], false, false)
     
@@ -109,16 +109,17 @@ if fit_is_local
     
             # get initial guesses from local fit if it exists
             data = ksr.get_results_local(results_path, df2fit[i,:ktfname],crit="best")
+            data = nothing
             if !isnothing(data)
                 # put the values into the dataframe
                 for (j,p) in enumerate(names(df2fit,ksr.fitpar))
                     if p == "a"
                         df2fit[i,p].value = data[2][j]
                         df2fit[i,p].min   = 0.001
-                        df2fit[i,p].var   = true
+                        df2fit[i,p].var   = false
                     elseif p == "t0"
                         df2fit[i,p].value = data[2][j]
-                        df2fit[i,p].var   = true
+                        df2fit[i,p].var   = false
                     elseif (p == "f_tr") || (p == "k_vac")
                         df2fit[i,p].value = data[2][j]
                         df2fit[i,p].var   = false
@@ -127,7 +128,7 @@ if fit_is_local
     
             # or set initial guesses manually
             else
-                df2fit.a[i].value = maxs[i][1]*0.25
+                df2fit.a[i].value = maxs[i][1]*1.0
                 df2fit.a[i].min   = 0.001
                 df2fit.a[i].var   = true
             
