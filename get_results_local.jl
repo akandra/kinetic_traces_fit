@@ -9,27 +9,31 @@ a tuple of initial guesses, best fit parameters, standard error and χ2 for the 
 if local_fit_filename exists
 otherwise nothing
 """
-function get_results_local(filename; crit = "best")
+function get_results_local(path, filename; crit = "best")
 
-    if isfile(filename)
+    fname = joinpath(path,filename)
+    if isfile(fname)
 
-        ini_guess = Float64[]
-        best_fit  = Float64[]
-        se        = Float64[]
-        chi2      = Float64
+        # ini_guess = Float64[]
+        # best_fit  = Float64[]
+        # se        = Float64[]
+        # chi2      = Float64
 
-        data = readdlm(filename,comments=true) 
+
+        data = readdlm(fname,comments=true) 
         if crit == "best" 
-            chi2ind = argmin(data[4:4:end,1])  # get the fit with minimal chi2
+            chi2ind = argmin(data[5:5:end,1])  # get the fit with minimal chi2
         elseif crit == "last" 
-            chi2ind = lastindex(data[4:4:end,1])  # get the last fit
+            chi2ind = lastindex(data[5:5:end,1])  # get the last fit
         else 
-            println("get_results_local: crit is unknown, takeing the default value.")
+            error("get_results_local: crit key is unknown.")
         end
-        ini_guess = data[1+4*(chi2ind-1),:]
-        best_fit  = data[2+4*(chi2ind-1),:]
-        se        = data[3+4*(chi2ind-1),:]
-        chi2      = data[4+4*(chi2ind-1),1]
+        
+        par_names = data[1+5*(chi2ind-1),:]
+        ini_guess = Dict(par_names .=> data[2+5*(chi2ind-1),:])
+        best_fit  = Dict(par_names .=> data[3+5*(chi2ind-1),:])
+        se        = Dict(par_names .=> data[4+5*(chi2ind-1),:])
+        chi2      = data[5+5*(chi2ind-1),1]
 
         return ini_guess, best_fit, se, chi2
     else

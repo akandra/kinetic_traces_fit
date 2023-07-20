@@ -41,10 +41,11 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
             println("Fit pars: ",fit1[i].param)
             println("Done fitting date #",i," of ",ndata)
 
-
             # write out parameter-related data
             mkpath(output_path)
             open( joinpath(output_path, df2fit[i,:].ktfname), "a") do io
+                write(io, "# parameter names\n")
+                writedlm(io, hcat(names(df2fitpar)...) )
                 write(io, "# initial guess\n")
                 writedlm(io, transpose(iguess[i,:]))
                 write(io,"# best fit\n")

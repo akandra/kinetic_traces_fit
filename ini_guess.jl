@@ -136,22 +136,41 @@ function set_guess_pars!(df::DataFrame, par_guesses, kinetic_traces, mins, maxs,
 
         df[!,r[:name]] = [fitpar() for _ in 1:nrows]
 
-        for i=1:nrows
-            if r[:value] isa Number
-                df[i,r[:name]].value = r[:value]
-            elseif r[:value] isa Tuple
-                if r[:value][1] == "maxs"
-                    df[i,r[:name]].value = r[:value][2]*maxs[i][1]
-                elseif r[:value][1] isa Function
-                    df[i,r[:name]].value = 
-                        r[:value][1](r[:value][2], kinetic_traces[i], mins[i], maxs[i], δs[i])
-                else
-                    error("set_guess_par(): the 2nd element of a tuple must be either maxs or function")
-                end
+        if r[:value] isa Number
+
+            [df[i,r[:name]].value = r[:value] for i=1:nrows]
+
+        elseif r[:value] isa Tuple
+
+            if r[:value][1] == "maxs"
+                [df[i,r[:name]].value = r[:value][2]*maxs[i][1] for i=1:nrows]
+            elseif r[:value][1] isa Function
+                [df[i,r[:name]].value = 
+                    r[:value][1](r[:value][2], kinetic_traces[i], mins[i], maxs[i], δs[i])  for i=1:nrows]
             else
-                error("set_guess_par(): a value must be a number or a tuple{number, string}")
+                error("set_guess_par(): the 2nd element of a guess_par tuple must be either 'maxs' or a function")
             end
 
+        elseif r[:value] isa String
+            
+            data = [ get_results_local(output_path, df[i,:ktfname], crit=r[:value]) for i=1:nrows]
+            for i=1:nrows
+                if isnothing(data[i])
+                    println("  ", df[i,:ktfname])
+                end
+            end
+            
+            if any(x->isnothing(x), data)
+                error("Do local fit for the above traces.")
+            end
+
+            [df[i,r[:name]].value = data[i][2][r[:name]] for i=1:nrows]
+
+        else
+            error("set_guess_par(): a value must be a number, a string or a tuple{number, string}")
+        end
+
+        for i=1:nrows
             haskey(r,:min) && (df[i,r[:name]].min = r[:min])
             haskey(r,:max) && (df[i,r[:name]].max = r[:max])
             haskey(r,:var) && (df[i,r[:name]].var = r[:var])

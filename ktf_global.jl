@@ -57,7 +57,7 @@ ksr.guess_rate(sfx = "5", ν=1.0*10^10, ϵ=0.5, var=false)
 
 ksr.guess_par(name= "a",   value= ("maxs", 1.0), min=0.001, var=true, glbl=false)
 
-ksr.guess_par(name="t_0",   value=-100,  min=-200.0, max=200.0, var=true, glbl=false)
+ksr.guess_par(name="t_0",   value="best",  min=-200.0, max=200.0, var=true, glbl=false)
 ksr.guess_par(name="f_t", value=1e-3, min=0.0, var=true, glbl=false)
 ksr.guess_par(name="k_vac",value=1e-5, var=false, glbl=false)
 
