@@ -21,12 +21,12 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
 """
 function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
 
+    # number of data sets
+    ndata = nrow(df2fit)
+
     if wtd[1] == "fit"
 
-        # number of data sets
-        ndata = nrow(df2fit)
-
-        println("Do global fit on ", ndata, " data sets...")
+        println("Your faithful servant is doing a global fit on ", ndata, " data sets...")
 
         # compose x and y data for curve_fit
         xdata = collect(Iterators.flatten([ kt[:,1] for kt in kinetic_traces ]))
@@ -96,26 +96,26 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
         end  
 
     elseif wtd[1] == "analysis"
-        #%% 
-        # data = get_results_global(results_path, df2fit.ktfname)
-        # best_fit_pars = Float64[]
-        # for k in 1:ncol(df2fitpar)
-        #     if data[3][1,k] > 0.0 # is variable?
-        #         if all(data[2][1,k] .== data[2][:,k]) # is global?
-        #             push!(best_fit_pars, data[2][1,k])
-        #         else
-        #             push!(best_fit_pars, data[2][:,k]...)
-        #         end
-        #     end
-        # end
-        # χ2 = data[4][1]
-        # # update fit parameter values in df2fitpar
-        # for i in 1:nrow(df2fitpar)
-        #     for j in 1:ncol(df2fitpar)
-        #         df2fitpar[i,j].value = data[2][i,j]
-        #     end
-        # end
-        # #%%        
+
+        data = get_results_global(output_path, df2fit.ktfname)
+        best_fit_pars = Float64[]
+        for k in 1:ncol(df2fitpar)
+            if data[3][1,k] > 0.0 # is variable?
+                if all(data[2][1,k] .== data[2][:,k]) # is global?
+                    push!(best_fit_pars, data[2][1,k])
+                else
+                    push!(best_fit_pars, data[2][:,k]...)
+                end
+            end
+        end
+        χ2 = data[4][1]
+        # update fit parameter values in df2fitpar
+        for i in 1:nrow(df2fitpar)
+            for j in 1:ncol(df2fitpar)
+                df2fitpar[i,j].value = data[2][i,j]
+            end
+        end
+
     elseif wtd[1] == "clean"
         println("Tell me what and how to clean!")
     else

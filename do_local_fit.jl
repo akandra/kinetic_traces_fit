@@ -74,22 +74,22 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
 
         elseif wtd[1] == "analysis"
 
-            data = get_results_local(joinpath(output_path,df2fit[i,:ktfname]), crit="best")
+            data = get_results_local(output_path,df2fit[i,:ktfname], crit="best")
             isnothing(data) && println("Error: Fit results file ", joinpath(output_path,df2fit[i,:ktfname]),
                                        " does not exist.\n     Please, run the fit for these data.")
+
             best_fit_pars = Float64[]
-            for (k, se) in enumerate(data[3])
-                if se > 0.0
-                    push!(best_fit_pars, data[2][k])
+            for d in names(df2fitpar)
+                if data[3][d] > 0.0
+                    push!(best_fit_pars, data[2][d])
                 end
             end
             χ2 = data[4][1]
             # update fit parameter structure in df2fitpar
-            for j in 1:ncol(df2fitpar)
-                df2fitpar[i,j].value = data[2][j]
-                df2fitpar[i,j].var = data[3][j] > 0.0
+            for p in data[2]
+                df2fitpar[i,p[1]].value = p[2]
+                df2fitpar[i,p[1]].var = data[3][p[1]] > 0.0
             end
-            #%%        
 
         elseif wtd == "clean"
 
@@ -165,28 +165,38 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                 push!(fitArrh, curve_fit((x,p) -> p[1] .- p[2]*x, Tinv[end][ipos], rlog[end][ipos], [1.0, 1.0]))
             end
 
-            # # do global fit for the data in i-th group
+            # do global fit for the data in ith group
 
-            # # get unbound copy of parameter part of dfg
-            # dfgpar = deepcopy(dfg[:,names(dfg,fitpar)])
+            # get unbound copy of parameter part of dfg
+            dfgpar = deepcopy(dfg[:,names(dfg,fitpar)])
 
-            # # adjust the values of glbl and var
-            # for (i,ν) in enumerate(ν_names) 
-            # ϵ = replace(ν,"ν"=>"ϵ") 
-            # for r in eachrow(dfgpar[:, [ν, ϵ] ])
-            #     r[1].glbl = true
-            #     r[2].glbl = true
-            #     r[2].var =  true 
-            #     r[1].value = exp(fitArrh[i].param[1]) 
-            #     r[2].value = fitArrh[i].param[2]/11604.5
-            # end
-            # end
-            # # fix the local values for t0, f_tr, k_vac
-            # for r in eachrow(dfgpar)
-            # # r[:t_0].var   = false
-            # r[:f_tr].var  = false
-            # r[:k_vac].var = false
-            # end
+            # adjust the values of glbl and var
+            for (i,sfx) in enumerate(k_sfxs)
+                # remove a rate constant colunm from dfgpar
+                select!(dfgpar,Not(Symbol(rate_constants_base*sfx)))
+                # get column names for the Arrhenius parameters                
+                νname = "ν"*sfx
+                ϵname = "ϵ"*sfx
+                # add them to the dfgpar
+                dfgpar[!,νname] = [fitpar() for _ in eachrow(dfgpar)]
+                dfgpar[!,ϵname] = [fitpar() for _ in eachrow(dfgpar)]
+                # fill them with Arrhenius fit values
+                # and set the glbl and var fields to true
+                for r in eachrow(dfgpar)
+                    r[νname].glbl = true 
+                    r[ϵname].glbl = true 
+                    r[νname].var  = true 
+                    r[ϵname].var  = true 
+                    r[νname].value = exp(fitArrh[i].param[1]) 
+                    r[ϵname].value = fitArrh[i].param[2]/11604.5
+                end
+            end
+
+            # fix the local values for f_tr, k_vac
+            for r in eachrow(dfgpar)
+                r[:f_t].var  = false
+                r[:k_vac].var = false
+            end
 
             # get indices for rows with relevant kinetic traces
             kt_idx = Int[]
@@ -194,18 +204,21 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                 push!(kt_idx, findfirst( ==(f), df2fit.ktfname) )
             end
 
-            # # set initial guess for prefactor and energy to those from local fit
-            # iguessg = zeros(nrow(dfgpar), ncol(dfgpar))
-            # for k in 1:nrow(dfgpar)
-            # for j in 1:ncol(dfgpar)
-            #     iguessg[k,j] = dfgpar[k,j].value
-            # end
-            # end
+            # set initial guess for prefactor and energy to those from local fit
+            iguessg = zeros(nrow(dfgpar), ncol(dfgpar))
+            for k in 1:nrow(dfgpar)
+                for j in 1:ncol(dfgpar)
+                    iguessg[k,j] = dfgpar[k,j].value
+                end
+            end
 
-            # # get global fit for the group dfg
-            # global_fit(dfg, dfgpar, kinetic_traces[kt_idx], results_path, 
-            #         iguessg, wtd = ("fit", ))
-
+            # set wtd to "fit"
+            wtd[1] = "fit"
+            # get global fit for the group dfg
+            do_global_fit(dfg, dfgpar, kinetic_traces[kt_idx], iguessg)
+            # set wtd to "fit"
+            wtd[1] = "analysis"
+ 
             # plotting arrheniusly
 
             subtitle = length(wtd) == 1 ? "" : " for "*wtd[2]*"="*string(dfg[1,wtd[2]])

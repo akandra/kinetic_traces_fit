@@ -34,7 +34,7 @@ ksr.conditions( "20170828-332-373-100-200.dat",
 # what_to_do   = "fit" or "analysis"
 # !!!Warning: consider replacing what_to_do with tag_hierarchy
 ksr.what_to_do("fit",      "rrr", "facet", "tag")
-#ksr.what_to_do("analysis", "rrr", "facet", "tag")
+ksr.what_to_do("analysis", "rrr", "facet", "tag")
 
 # Set maximum temperature for Arrhenius fits
 ksr.Arrh_Tmax(480.0)

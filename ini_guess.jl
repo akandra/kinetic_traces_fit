@@ -153,15 +153,15 @@ function set_guess_pars!(df::DataFrame, par_guesses, kinetic_traces, mins, maxs,
 
         elseif r[:value] isa String
             
-            data = [ get_results_local(output_path, df[i,:ktfname], crit=r[:value]) for i=1:nrows]
+            data = [ get_results_local(local_fit_path, df[i,:ktfname], crit=r[:value]) for i=1:nrows]
             for i=1:nrows
                 if isnothing(data[i])
-                    println("  ", df[i,:ktfname])
+                    println("   No fit results were found for  ", joinpath(local_fit_path,df[i,:ktfname]))
                 end
             end
             
             if any(x->isnothing(x), data)
-                error("Do local fit for the above traces.")
+                error("Please do a local fit for the above traces.")
             end
 
             [df[i,r[:name]].value = data[i][2][r[:name]] for i=1:nrows]

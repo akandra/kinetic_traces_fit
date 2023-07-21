@@ -2,6 +2,7 @@ function load_kinetic_traces(df2fit, data_path)
 
     println("Loading Kinetic Traces...")
     [ println(" ",filename) for filename in df2fit.ktfname ]
+    println("")
 
     kinetic_traces = get_data(data_path, df2fit.ktfname)
     ndata = length(kinetic_traces)

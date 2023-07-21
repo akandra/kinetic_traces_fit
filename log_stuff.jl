@@ -23,6 +23,9 @@ fit_function(str::String) = include(joinpath(fit_path,str)*".jl")
 output_path = "./"
 path_to_output(str::String, m) = (global output_path = splitext(m)[1]*"_"*str )
 
+local_fit_path    = "./"
+path_to_local_fit_results(str::String)   = (global local_fit_path = str)
+
 fn_delim = "-"
 delim(str) = (global fn_delim = str)
 
@@ -37,8 +40,9 @@ conds = []
 conditions(args...) = push!(conds, args)
 
 # what to do variable 
-wtd = ()
-what_to_do(args...) = (global wtd = args)
+wtd1 = []
+what_to_do(args...) = (global wtd1 = args)
+wtd = [w for w in wtd1]
 
 # maximum temperature for Arrhenius fits
 T_cutoff::Number = Inf

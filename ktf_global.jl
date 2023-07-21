@@ -6,6 +6,7 @@ ksr.working_dir("../../Dropbox/Kinetics of Surface Reactions/H-Oxidation-Pt")
 ksr.path_to_data("data")
 ksr.path_to_model("",".")
 ksr.path_to_fit_function("",".")
+ksr.path_to_local_fit_results("./ktf_local_out")
 
 # Julia code containing a kinetic model and a fitting function
 ksr.model("kinetic_model")
@@ -28,14 +29,14 @@ ksr.conditions( "20170828-332-373-100-200.dat",
                 "20201117-111-423-25-50.dat", 
                 "20201117-111-473-25-50.dat"
                 )
-# ksr.conditions(2,3)
-ksr.conditions(6:6)
+ksr.conditions(4,5)
+# ksr.conditions(6:6)
 
 # Set what is to be done
 # what_to_do   = "fit" or "analysis"
 # !!!Warning: consider replacing what_to_do with tag_hierarchy
 ksr.what_to_do("fit",      "rrr", "facet", "tag")
-#ksr.what_to_do("analysis", "rrr", "facet", "tag")
+ksr.what_to_do("analysis", "rrr", "facet", "tag")
 
 # Set maximum temperature for Arrhenius fits
 ksr.Arrh_Tmax(480.0)
