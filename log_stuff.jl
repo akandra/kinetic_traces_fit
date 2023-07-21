@@ -40,9 +40,8 @@ conds = []
 conditions(args...) = push!(conds, args)
 
 # what to do variable 
-wtd1 = []
-what_to_do(args...) = (global wtd1 = args)
-wtd = [w for w in wtd1]
+wtd = []
+what_to_do(args...) = (global wtd = [args...])
 
 # maximum temperature for Arrhenius fits
 T_cutoff::Number = Inf
