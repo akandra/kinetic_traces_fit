@@ -68,14 +68,13 @@ function do_it()
 
 end
 
-#NEXTTIME: adjust the kt files and the df to our new understanding the things    
 # Consider for the future development
 #
 # 1. Consider cleaning up the code:
-#        - adjust set_guess() to eliminate ambiguities
-#        - eliminating df2fitpar data frame
-#        - eliminating tests based upon names of parameters 
-#          by, for example, including additional fields into fitpar structure 
+#        - check set_guess() for existence of useful usage case;
+#        - consider eliminating df2fitpar data frame;
+#        - check if there are tests based upon names of parameters, and systematically purge them; 
+#
 # 2. Change the way how the kinetic traces files are named and supplied with ancillary info.
 #    Consider 3 ways of doing that:
 #        - create a single ancillary file
