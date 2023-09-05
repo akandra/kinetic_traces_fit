@@ -6,6 +6,10 @@ using Parameters
 using DifferentialEquations
 using LsqFit
 using Plots
+using Statistics: mean
+
+# debugging output tag
+debug = 0
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
@@ -18,8 +22,11 @@ using Plots
 
 end
 
+# functions logging things from input
+include("log_stuff.jl")
+
 # in/out functions
-include("get_beampars.jl")
+include("get_pump_beam.jl")
 include("get_data.jl")
 include("load_kinetic_traces.jl")
 
@@ -35,17 +42,16 @@ include("get_results_local.jl")
 include("get_results_global.jl")
 
 # functions doing fits
-include("global_fit.jl")
-include("local_fit.jl")
+include("do_local_fit.jl")
+include("do_global_fit.jl")
 
 # function calculating the fitting function
-include("H2OProduction.jl")
-
-# function defining the kinetic model
-include("eqns.jl")
-include("H2Pulse.jl")
+include("product_flux.jl")
 
 # function creating the dataframe
 include("create_df.jl")
+
+# do-it function
+include("do_it.jl")
 
 end

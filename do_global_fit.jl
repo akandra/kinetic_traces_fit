@@ -1,7 +1,7 @@
 """
 Do global fit to a set of kinetic traces
 
-global_fit(df, dfpar, kt, path, iguess;  wtd)
+do_global_fit(df, dfpar, kt, path, iguess;  wtd)
 
 df::DataFrame contains all info, see function create_df for details
 
@@ -19,28 +19,14 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
                     selectors defines grouping (can be empty)
 
 """
-function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd = ("analysis",) )
+function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
+
+    # number of data sets
+    ndata = nrow(df2fit)
 
     if wtd[1] == "fit"
 
-        # number of data sets
-        ndata = nrow(df2fit)
-
-        # println("ν2=",df2fitpar[1,:ν2].value, " is "*(df2fitpar[1,:ν2].var ? "variable" : "fixed"))
-        # println("ϵ2=",df2fitpar[1,:ϵ2].value, " is "*(df2fitpar[1,:ϵ2].var ? "variable" : "fixed"))
-        # println("ν2=",df2fitpar[3,:ν2].value, " is "*(df2fitpar[3,:ν2].var ? "variable" : "fixed"))
-        # println("ϵ2=",df2fitpar[1,:ϵ2].value, " is "*(df2fitpar[1,:ϵ2].var ? "variable" : "fixed"))
-        # println("ν3=",df2fitpar[1,:ν3].value, " is "*(df2fitpar[1,:ν3].var ? "variable" : "fixed"))
-        # println("ϵ3=",df2fitpar[1,:ϵ3].value, " is "*(df2fitpar[1,:ϵ3].var ? "variable" : "fixed"))
-        # println("ν3=",df2fitpar[3,:ν3].value, " is "*(df2fitpar[3,:ν3].var ? "variable" : "fixed"))
-        # println("ϵ3=",df2fitpar[1,:ϵ3].value, " is "*(df2fitpar[1,:ϵ3].var ? "variable" : "fixed"))
-        # println("a=",df2fitpar[1,:a].value, " is "*(df2fitpar[1,:a].var ? "variable" : "fixed"))
-        # println("t0=",df2fitpar[1,:t0].value, " is "*(df2fitpar[1,:t0].var ? "variable" : "fixed"))
-        # println("f_tr=",df2fitpar[1,:f_tr].value, " is "*(df2fitpar[1,:f_tr].var ? "variable" : "fixed"))
-        # println("k_vac=",df2fitpar[1,:k_vac].value, " is "*(df2fitpar[1,:k_vac].var ? "variable" : "fixed"))
-        # println("baseline=",df2fitpar[1,:baseline].value, " is "*(df2fitpar[1,:baseline].var ? "variable" : "fixed"))
-
-        print("Do global fit on ", ndata, " data sets...")
+        println("Your faithful servant is doing a global fit on ", ndata, " data sets...")
 
         # compose x and y data for curve_fit
         xdata = collect(Iterators.flatten([ kt[:,1] for kt in kinetic_traces ]))
@@ -60,19 +46,19 @@ function global_fit(df2fit, df2fitpar, kinetic_traces, results_path, iguess; wtd
                 end
             end
         end
-println(pini)
-        H2OProdflg = [0]
-        @time fit = curve_fit( (x,p)->H2OProduction(x, p, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg), 
-                        xdata, ydata, pini, lower=plb, upper=pub; 
-                        maxIter=1000, show_trace=true)
 
+        call_counts = [0]
+        @time fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
+                        xdata, ydata, pini, lower=plb, upper=pub; 
+                        maxIter=1000, show_trace = false)
         best_fit_pars = fit.param
 
-        println(" It took ", H2OProdflg[1], " function calls.")
+        println(" It took ", call_counts[1], " function calls.")
 #        println("Fit pars: ",fit.param)
 
         # save the parameter-related data to a file
-        open(results_path*"global_fit.dat", "a") do io
+        mkpath(output_path)
+        open( joinpath(output_path,"global_fit.dat"), "a") do io
             write(io, "# file names\n")
             writedlm(io, df2fit.ktfname)
             write(io, "# initial guess\n")
@@ -84,6 +70,7 @@ println(pini)
                 writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
             end
             write(io,"# standard error\n")
+
             sef = try 
                     stderror(fit)
                 catch e
@@ -109,8 +96,8 @@ println(pini)
         end  
 
     elseif wtd[1] == "analysis"
-        #%% 
-        data = get_results_global(results_path, df2fit.ktfname)
+
+        data = get_results_global(output_path, df2fit.ktfname)
         best_fit_pars = Float64[]
         for k in 1:ncol(df2fitpar)
             if data[3][1,k] > 0.0 # is variable?
@@ -128,7 +115,7 @@ println(pini)
                 df2fitpar[i,j].value = data[2][i,j]
             end
         end
-        #%%        
+
     elseif wtd[1] == "clean"
         println("Tell me what and how to clean!")
     else
@@ -137,11 +124,11 @@ println(pini)
     end
 
     # plotting data
-    H2OProdflg = [0]
-    yfit = H2OProduction(0, best_fit_pars, df2fit, df2fitpar, kinetic_traces, ndata, H2OProdflg)
+    call_counts = [0]
+    yfit = product_flux(0, best_fit_pars, df2fit, df2fitpar, kinetic_traces, ndata, call_counts)
     
     # find global dataset characteristics
-    ch_list = ["rrr", "facet", "tag"]
+    ch_list = wtd[2:end]#["rrr", "facet", "tag"]
     current_y = [0.95] 
     ann = [((0.5,current_y[1]), text("Global fit:"))]
     current_y = [0.9] 
@@ -177,7 +164,7 @@ println(pini)
         push!(plots, 
                 plot(d[:,1], [d[:,2], yfit[icounter[1]:icounter[1]+size(d,1)-1]],
                 seriestype=[:scatter :line], framestyle=:box, label=["data" "global fit"],
-                xlabel="time (μs)", ylabel="H₂O flux (a.u.)", 
+                xlabel="time (μs)", ylabel=product_species*" flux (a.u.)", 
                 title= tsurf
                  )
             )

@@ -11,7 +11,7 @@ function get_results_global(path, filenames)
     ind       = 0 
 
     
-    data      = readdlm(path*filename)
+    data      = readdlm(joinpath(path,filename))
     ifn = first.( Tuple.(findall(s-> s=="file",data)) ) .+ 1     # indices for file names
     iig = first.( Tuple.(findall(s-> s=="initial",data)) ) .+ 1  # indices for initial guesses
     ibf = first.( Tuple.(findall(s-> s=="best",data)) ) .+ 1     # indices for best fit parameters

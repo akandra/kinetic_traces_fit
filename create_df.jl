@@ -1,44 +1,42 @@
-function create_df(data_path)
+function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::String)
 
     datafilenames = readdir(data_path)
-    beamfnames      = filter(x-> occursin("beam",x) ,datafilenames)
-    Oinifnames      = filter(x-> occursin("Oini",x) ,datafilenames)
-    kintracesfnames = filter(x->!(occursin("beam",x) || occursin("Oini",x)) ,datafilenames)
+    pumpfnames      = filter(x-> occursin(pump_sfx,x) ,datafilenames)
+    covfnames       = filter(x-> occursin(cov_sfx,x) ,datafilenames)
+    kintracesfnames = filter(x->!(occursin(pump_sfx,x) || occursin(cov_sfx,x)) ,datafilenames)
 
     # create kinetic traces data frame
-    tags =[ map( f->split( splitext(f)[1], "-")[i], kintracesfnames ) for i in 1:5 ]
-    df = DataFrame(tags, [:tag,:facet,:temperature,:rrH2,:rrO2])
+    # Warning:  after changing the storing of the tag information
+    #           do not forget to make the corresponding adjustments in the following code
+    tags =[ map( f->split( splitext(f)[1], delim)[i], kintracesfnames ) for i in 1:5 ]
+    df = DataFrame(tags, [:tag,:facet,:temperature,:rr_pump,:rr_cov])
     df[!,:temperature] = parse.(Float64,df[!,:temperature])
-    df[!,:rrH2] = parse.(Float64,df[!,:rrH2])
-    df[!,:rrO2] = parse.(Float64,df[!,:rrO2])
-    df[!,:rrr]  = df[!,:rrO2] ./ df[!,:rrH2]
+    df[!,:rr_pump] = parse.(Float64,df[!,:rr_pump])
+    df[!,:rr_cov] = parse.(Float64,df[!,:rr_cov])
+    df[!,:rrr] = df.rr_cov ./ df.rr_pump
+
     df[!,:ktfname] = kintracesfnames
-    df[!,:beamfname] = tags[1] .* "-beam.dat"
+    df[!,:pump_file] = tags[1] .* (delim * pump_sfx * ".dat")
 
-    # create H2-pulse data frame
-    dfbeam = DataFrame( beamfname = beamfnames, beampars = get_beampars(beamfnames) )
-    df = innerjoin(df,dfbeam, on=:beamfname)
+    # create pump-pulse data frame
+    dfpump = get_pump_beam(pumpfnames)
+    df = innerjoin(df,dfpump, on=:pump_file)
 
-    # create geometry parameters data frame
-    dfgeom = DataFrame( facet = String[], geompars = Vector{Float64}[] )
-    push!(dfgeom, ( "332", [1.0/6.0, 2, 1, 1, 1]) )
-    push!(dfgeom, ( "111", [  0.005, 2, 1, 1, 1]) )
-    df = innerjoin(df,dfgeom, on=:facet)
-
-    # create [O]_ini data frame
-    Oinidata = get_data(data_path, Oinifnames)
-    tagsOini = map( f->split( splitext(f)[1], "-")[1], Oinifnames )
-    tags1 = vcat(fill.(tagsOini,size.(Oinidata,1))...)
-    dfOini = DataFrame(vcat(Oinidata...),[:temperature,:rrH2,:rrO2,:Oini])
-    dfOini[!,:tag] = tags1
+    # create initial coverage data frame
+    cov_name, covdata = get_data_cov(data_path, covfnames)
+    tagscov = map( f->split( splitext(f)[1], delim)[1], covfnames )
+    tags1 = vcat(fill.(tagscov,size.(covdata,1))...)
+    dfcov = DataFrame(vcat(covdata...),[:temperature,:rr_pump,:rr_cov,:cov0])
+    dfcov[!,:cov_species] .= cov_name
+    dfcov[!,:tag] = tags1
     # join above data frames
-    df = innerjoin(df, dfOini, on = [:tag, :temperature, :rrH2, :rrO2])
+    df = innerjoin(df, dfcov, on = [:tag, :temperature, :rr_pump, :rr_cov])
 
-    # set the names for fit parameter columns
-    fitparsnames = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5",
-                     "a", "t0", "baseline", "f_tr", "k_vac" ]
-    # we avoid using fill(), see rebind_vs_mutate.jl in juliaFun to find out why
-    [ df[!,n] = [fitpar() for _ in 1:nrow(df)] for n in fitparsnames]
+    # create step density data frame
+    dfθs = DataFrame( facet =        [ k[:facet] for k in θs ],
+                      step_density = [ k[:value] for k in θs ])
+    # join to the total data frame
+    df = innerjoin(df,dfθs, on=:facet)
 
     return df
 
