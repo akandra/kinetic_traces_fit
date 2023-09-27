@@ -2,7 +2,13 @@ function set_initial_guesses!(df::DataFrame)
 
     set_guess_rate!(df)    
     set_guess_Arrh!(df)
-    set_guess!(df)    
+    set_guess!(df)   
+    
+    for r in rate_constants
+        if !(r in names(df))
+            error("no initial guess for rate constant "*r*".")
+        end
+    end
     
 end
 
