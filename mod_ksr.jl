@@ -11,6 +11,15 @@ using Statistics: mean
 # debugging output tag
 debug = 0
 
+# structure for adsorbates
+struct adsorbate 
+
+    name :: String
+    site :: string
+    σ    :: Int16
+
+end
+
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
 

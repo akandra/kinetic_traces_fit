@@ -1,13 +1,22 @@
 # Theo's All Step Model
 
-# Set the names for fit parameter dataframe columns
-# Note: use "ν" to start a name of prefactor parameter,
-#       and "ϵ" to start a name of energy parameter
-#fitparsnames_model = ["ν1","ϵ1","νm1","ϵm1","ν2","ϵ2","ν3","ϵ3","ν4","ϵ4","ν5","ϵ5"]
+# NOTE FOR TOMORROW: how about DataFrame?
+species = [
+            adsorbate( "H₂",  "", 0),
+            adsorbate(  "O", "s", 2),
+            adsorbate( "OH", "s", 1),
+            adsorbate(  "H", "s", 1),
+            adsorbate("H₂O", "s", 1)
+          ]
 
-species = Dict("H₂"=>1, "O"=>2, "OH"=>3, "H"=>4, "H₂O"=>5)
+# consider to get the indices automatically from the above structure
+iH2  :: Int = 1
+iOs  :: Int = 2
+iOHs :: Int = 3
+iHs  :: Int = 4
+iH2O :: Int = 5
 
-#rate_constants = Dict("k1"=>1, "km1"=>2, "k2"=>3, "k3"=>4, "k4"=>5, "k5"=>6)
+
 rate_constants_base = "k"
 rate_constants_sfx = ["1", "m1", "2", "3", "4", "5"]
 
@@ -19,12 +28,6 @@ function kin_model!(ydot::Vector{Float64},y::Vector{Float64},p::Vector{Float64},
     # (3) OH + OH -k3> H₂O + O
     # (4)  H + H  -k4> H₂ 
     # (2)  H₂O -k5> H₂O(gas)  
-
-    iH  :: Int = species["H"]
-    iH2 :: Int = species["H₂"]
-    iH2O:: Int = species["H₂O"]
-    iO  :: Int = species["O"]
-    iOH :: Int = species["OH"]
 
     σO  :: Int = occ_factors["O"]
     σOH :: Int = occ_factors["OH"]
