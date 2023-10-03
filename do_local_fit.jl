@@ -113,7 +113,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
         rrr = "RRR = "*split(fbase,"-")[4]*"/"*split(fbase,"-")[5]
         display(plot( kinetic_traces[i][:,1], [kinetic_traces[i][:,2], yfit1, [df2fit1.baseline[1].value],[xdata1[df2fit1[1,:cutoff]]]],
             seriestype=[:scatter :line :hline :vline], framestyle=:box, label=["data" "fit" "baseline" "cutoff"],
-            xlabel="time (μs)", ylabel=product_species*" flux (a.u.)", 
+            xlabel="time (μs)", ylabel="flux (a.u.)", 
             title=tag*": "*facet*", "*tsurf*", "*rrr,
             size=(600,600),
             ann=append!(

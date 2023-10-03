@@ -34,7 +34,7 @@ ksr.conditions( "20170828-332-373-100-200.dat",
 # what_to_do   = "fit" or "analysis"
 # !!!Warning: consider replacing what_to_do with tag_hierarchy
 ksr.what_to_do("fit",      "rrr", "facet", "tag")
-ksr.what_to_do("analysis", "rrr", "facet", "tag")
+#ksr.what_to_do("analysis", "rrr", "facet", "tag")
 
 # Set maximum temperature for Arrhenius fits
 ksr.Arrh_Tmax(480.0)
@@ -62,12 +62,5 @@ ksr.guess_par(name="baseline",value=(ksr.set_baseline,7), var=false, glbl=false)
 
 ksr.step_density(facet="332", value=1/6)
 ksr.step_density(facet="111", value=0.005)
-
-ksr.occupancies(species=  "O", value=2)
-ksr.occupancies(species=  "H", value=1)
-ksr.occupancies(species= "OH", value=1)
-ksr.occupancies(species="H₂O", value=1)
-
-ksr.products("H₂O")
 
 ksr.do_it()

@@ -30,29 +30,29 @@ b is a baseline value
 # Set the names for fit parameter dataframe columns
 fit_parnames = ["a", "t_0", "f_t", "k_vac", "baseline", "cutoff" ]
 
-function fit_function(ODEsol, dfpar::DataFrame, times::Vector{Float64})
+function fit_function(ODEsol, df1::DataFrame, times::Vector{Float64})
 
     # get values of fitting parameters from the data frame
     # NB: the names have to be consistent with fit_parnames
 
-    t0       = dfpar[1,"t_0"].value
-    a        = dfpar[1,"a"].value
-    baseline = dfpar[1,"baseline"].value
-    f_tr     = dfpar[1,"f_t"].value
-    k_vac    = dfpar[1,"k_vac"].value
+    t0       = df1[1,"t_0"].value
+    a        = df1[1,"a"].value
+    baseline = df1[1,"baseline"].value
+    f_tr     = df1[1,"f_t"].value
+    k_vac    = df1[1,"k_vac"].value
 
     # produce a solution vector for a product
-    sol = ODEsol(times .- t0)[species[product_species],:]
+    pflux = prod_flux!(ODEsol(times .- t0), df1)
 
     # define the model function
 
-    normfactor = maximum(sol)
+    normfactor = maximum(pflux)
     if normfactor == 0
-        return a*sol .+ baseline
+        return a*pflux .+ baseline
     else
-        sol_acc = zeros(length(sol))
-        cumsum!(sol_acc, sol/normfactor)
-        return a*(sol/normfactor + f_tr*exp.(-k_vac*(times .- t0)) .* sol_acc/sol_acc[end]) .+ baseline
+        pflux_acc = zeros(length(pflux))
+        cumsum!(pflux_acc, pflux/normfactor)
+        return a*(pflux/normfactor + f_tr*exp.(-k_vac*(times .- t0)) .* pflux_acc/pflux_acc[end]) .+ baseline
     end
 
 end

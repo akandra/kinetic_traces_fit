@@ -60,7 +60,7 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
         # initialize concentrations
         y0 = zeros(Float64,length(species))
         # get concentration of coverage species
-        y0[ species[df2fit.cov_species[i]] ] =  df2fit.cov0[i]
+        y0[ findfirst(isequal(df2fit.cov_species[i]), species) ] =  df2fit.cov0[i]
 
         # WARNING: think of something better than 200.0
         tspan = ( d[begin,1], d[end,1] + 200.0 ) #.- t0s[i]
@@ -71,7 +71,7 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
         prob = ODEProblem( (ydot,y,r,t) -> kin_model!(ydot,y,r,t, df2fit.pumppars[i], df2fit.step_density[i]), y0, tspan, rates )
         sol = solve(prob,abstol=1e-14)
     
-        append!(flux, fit_function(sol, df2fitpar[i:i,:], d[:,1]))
+        append!(flux, fit_function(sol, df2fit[i:i,:], d[:,1]))
     end
 
     return flux

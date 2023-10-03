@@ -164,7 +164,7 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
         push!(plots, 
                 plot(d[:,1], [d[:,2], yfit[icounter[1]:icounter[1]+size(d,1)-1]],
                 seriestype=[:scatter :line], framestyle=:box, label=["data" "global fit"],
-                xlabel="time (μs)", ylabel=product_species*" flux (a.u.)", 
+                xlabel="time (μs)", ylabel="flux (a.u.)", 
                 title= tsurf
                  )
             )
