@@ -68,10 +68,13 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
         # get values for rate constants
         rates = [ df2fit[i,r].value for r in rate_constants]
 
-        prob = ODEProblem( (ydot,y,r,t) -> kin_model!(ydot,y,r,t, df2fit[i:i,:]), y0, tspan, rates )
+        prob = ODEProblem( (ydot,y,r,t) -> 
+                            kin_model!(ydot, y, r, t, df2fit.pumppars[i], df2fit.step_density[i], df2fit.temperature[i]), 
+                                y0, tspan, rates )
         sol = solve(prob,abstol=1e-14)
-    
-        append!(flux, fit_function(sol, df2fit[i:i,:], d[:,1]))
+ 
+        fpars  = [ df2fit[i,r].value for r in fit_parnames]
+        append!(flux, fit_function(sol, d[:,1], df2fit.step_density[i], rates, fpars))
     end
 
     return flux

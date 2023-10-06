@@ -11,6 +11,9 @@ using Statistics: mean
 # debugging output tag
 debug = 0
 
+# important constants
+kB = 1/11604.5 # conversion from K to eV
+
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
 
