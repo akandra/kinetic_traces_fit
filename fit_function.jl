@@ -28,21 +28,14 @@ b is a baseline value
 
 """
 # Set the names for fit parameter dataframe columns
-fit_parnames = ["a", "t_0", "f_t", "k_vac", "baseline", "cutoff" ]
+fit_parnames = ["a", "t_0", "f_t", "k_vac", "baseline"]
 
-function fit_function(ODEsol, df1::DataFrame, times::Vector{Float64})
+function fit_function(ODEsol, times::Vector{Float64}, θstep::Float64, rates::Vector{Float64}, fpars::Vector{Float64})
 
-    # get values of fitting parameters from the data frame
-    # NB: the names have to be consistent with fit_parnames
-
-    t0       = df1[1,"t_0"].value
-    a        = df1[1,"a"].value
-    baseline = df1[1,"baseline"].value
-    f_tr     = df1[1,"f_t"].value
-    k_vac    = df1[1,"k_vac"].value
+    a, t0, f_tr, k_vac, baseline = fpars
 
     # produce a solution vector for a product
-    pflux = prod_flux!(ODEsol(times .- t0), df1)
+    pflux = prod_flux!(ODEsol(times .- t0), θstep, rates)
 
     # define the model function
 

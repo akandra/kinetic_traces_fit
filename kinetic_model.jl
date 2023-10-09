@@ -18,7 +18,8 @@ rate_constants_base = "k"
 rate_constants_sfx = ["1", "m1", "2", "3", "4", "5"]
 
 # For the future: make it possible to use any name for the function
-function kin_model!(ydot::Vector{Float64},y::Vector{Float64},p::Vector{Float64},t::Float64, beampars::Vector{Vector{Float64}}, θs)
+function kin_model!(ydot::Vector{Float64},y::Vector{Float64},p::Vector{Float64},t::Float64, 
+                    beampars::Vector{Vector{Float64}}, θs::Float64, Tsurf::Float64)
     # All-step model from Theo (everything occurs on steps)
     # (1)  H₂ + O <- km1, k1 -> OH + H
     # (2)  H + OH -k2> H₂O 
@@ -28,7 +29,7 @@ function kin_model!(ydot::Vector{Float64},y::Vector{Float64},p::Vector{Float64},
 
     κ1, κm1, κ2, κ3, κ4, κ5 = p
 
-    a, fwhm, tcenter        = beampars
+    a, fwhm, tcenter = beampars
     
     beam = pump_pulse(t,a,fwhm,tcenter)
 
@@ -39,11 +40,12 @@ function kin_model!(ydot::Vector{Float64},y::Vector{Float64},p::Vector{Float64},
     ydot[iH2O]=  κ2*y[iOH]*y[iH]*σH2O/(σH*σOH) + κ3*y[iH]*y[iH]*σH2O/(σOH*σOH) - κ5*y[iH2O]   
 end 
 
-function prod_flux!(sol, df1::DataFrame)
+function prod_flux!(sol, θs::Float64, rates::Vector{Float64})
 
     # For future reference γ is available
-    # γ = df1.step_density[1]/(2 - df1.step_density[1])
+    # γ = θs/(2 - θs)
 
-    return df1[1,"k5"].value*sol[iH2O,:]
+    κ5 = rates[6]
+    return κ5*sol[iH2O,:]
     
 end 
