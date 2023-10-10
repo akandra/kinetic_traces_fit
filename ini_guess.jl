@@ -1,7 +1,9 @@
 function set_initial_guesses!(df::DataFrame)
 
-    set_guess_rate!(df)    
-    set_guess_Arrh!(df)
+    set_guess_Arrh_local!(df)
+    set_guess_hTST_local!(df)
+    set_guess_Arrh_global!(df)
+    set_guess_hTST_global!(df)
     set_guess!(df)   
     
     for r in rate_constants
@@ -13,13 +15,13 @@ function set_initial_guesses!(df::DataFrame)
 end
 
 """
-Adds columns to the df with initial guesses for rate for a local fit
+Adds columns to the df with initial guesses for Arrhenius rate for a local fit
 """
-function set_guess_rate!(df::DataFrame)
+function set_guess_Arrh_local!(df::DataFrame)
 
     nrows = nrow(df)
 
-    for r in rate_guesses
+    for r in guess_Arrh_local
 
         k_name = rate_constants_base*r[:sfx]
 
@@ -41,14 +43,46 @@ function set_guess_rate!(df::DataFrame)
 end
 
 """
-Adds columns to the df with initial guesses for Arrhenius prefactor and energy
-for a global fit
+Adds columns to the df with initial guesses for hTST rate for a local fit
 """
-function set_guess_Arrh!(df::DataFrame)
+function set_guess_hTST_local!(df::DataFrame)
 
     nrows = nrow(df)
 
-    for r in Arrh_guesses
+    for r in guess_hTST_local
+
+        if !isequal(length(r[:hνR]) - 1, length(r[:hνTS]))
+            error("log_stuff.jl: length of hνTS has to be length of hνR - 1")
+        end
+
+        k_name = rate_constants_base*r[:sfx]
+
+        if !(r[:sfx] in rate_constants_sfx)
+            error("parameter with suffix "*r[:sfx]*" does not exist")
+        end
+
+        df[!,k_name] = [fitpar() for _ in 1:nrows]
+
+        for i=1:nrows
+            df[i,k_name].value = hTST(df[i,:temperature], r[:hνR], r[:hνTS], r[:ϵ])
+            df[i,k_name].var   = r[:var]
+            df[i,k_name].min   = df[i,k_name].value/1024.0
+            df[i,k_name].glbl  = false
+        end
+    
+    end
+
+end
+
+"""
+Adds columns to the df with initial guesses for Arrhenius prefactor and energy
+for a global fit
+"""
+function set_guess_Arrh_global!(df::DataFrame)
+
+    nrows = nrow(df)
+
+    for r in guess_Arrh_global
 
         kname = rate_constants_base*r[:sfx]
         νname = "ν"*r[:sfx]
@@ -82,6 +116,61 @@ function set_guess_Arrh!(df::DataFrame)
 
 end
 
+
+"""
+Adds columns to the df with initial guesses for hTST rate for a global fit
+"""
+function set_guess_hTST_global!(df::DataFrame)
+
+    nrows = nrow(df)
+
+    for r in guess_hTST_global
+
+        if !isequal(length(r[:hνR]) - 1, length(r[:hνTS]))
+            error("log_stuff.jl: length of hνTS has to be length of hνR - 1")
+        end
+
+        kname = rate_constants_base*r[:sfx]
+        ϵname = "ϵ"*r[:sfx]
+
+        hνRnames  = [  "hνR"*r[:sfx]*string(i) for i in 1:length(r[:hνR]) ]
+        hνTSnames = [ "hνTS"*r[:sfx]*string(i) for i in 1:length(r[:hνTS])]
+    
+        if !(r[:sfx] in rate_constants_sfx)
+            error("parameter with suffix "*r[:sfx]*" does not exist")
+        end
+
+        df[!,kname] = [fitpar() for _ in 1:nrows]
+        df[!,ϵname] = [fitpar() for _ in 1:nrows]
+        [ df[!,n]  = [fitpar() for _ in 1:nrows] for n in hνRnames]
+        [ df[!,n]  = [fitpar() for _ in 1:nrows] for n in hνTSnames]
+    
+        for i=1:nrows
+
+            df[i,kname].value = hTST(df[i,:temperature], r[:hνR], r[:hνTS], r[:ϵ])
+            df[i,kname].glbl  = true
+
+            df[i,ϵname].value = r[:ϵ]
+            df[i,ϵname].var   = r[:var]
+            df[i,ϵname].min   = df[i,ϵname].value/1024.0
+            df[i,ϵname].glbl  = true
+    
+            for (idx,n) in enumerate(hνRnames)
+                df[i,n].value = r[:hνR][idx]
+                df[i,n].var   = false
+                df[i,n].glbl  = true
+            end
+            for (idx,n) in enumerate(hνTSnames)
+                df[i,n].value = r[:hνTS][idx]
+                df[i,n].var   = false
+                df[i,n].glbl  = true
+            end
+
+        end
+    
+    end
+
+end
 
 """
 Adds columns to the df with initial guesses for Arrhenius parameters

@@ -172,7 +172,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
 
             # adjust the values of glbl and var
             for (i,sfx) in enumerate(k_sfxs)
-                # remove a rate constant colunm from dfgpar
+                # remove a rate constant column from dfgpar
                 select!(dfgpar,Not(Symbol(rate_constants_base*sfx)))
                 # get column names for the Arrhenius parameters                
                 νname = "ν"*sfx

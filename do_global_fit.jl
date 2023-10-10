@@ -21,6 +21,8 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
 """
 function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
 
+    set_T_function_keys()
+
     # number of data sets
     ndata = nrow(df2fit)
 
@@ -179,5 +181,27 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
     for p in 1:nslots:length(plots)
         display( plot!(plots[p:p+nslots-1]..., layout = page_layout, size=(1200,900)) )
     end
+
+end
+
+# set the temperature function keys
+function set_T_function_keys()
+
+    global T_function_keys = zeros(Int,length(rate_constants),2)
+
+    for (i,r) in enumerate(rate_constants_sfx)
+        
+        if r in [ v[:sfx]  for v in guess_Arrh_global ]
+            T_function_keys[i,1] = 1
+        end
+
+        for v in guess_hTST_global 
+            if r == v[:sfx]
+                T_function_keys[i,1] = 2
+                T_function_keys[i,2] = length(v[:hνR])
+            end
+        end
+    
+    end    
 
 end

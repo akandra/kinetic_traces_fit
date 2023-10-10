@@ -10,8 +10,11 @@ model_path = "./"
 path_to_model(str::String) = (global model_path = joinpath(path, str))
 path_to_model(str::String, folder::String) = (global model_path = joinpath(folder, str))
 rate_constants = String[]
+
 function model(str::String)
+    # load user's model file 
     include(joinpath(model_path,str)*".jl")
+    # get rate constant names
     global rate_constants = rate_constants_base .* rate_constants_sfx
 end
 
@@ -52,17 +55,26 @@ data_cutoff_fraction  = "off"
 cutoff_fraction(x) = (global data_cutoff_fraction = x)
 
 # initial guesses
-rate_guesses = []
-guess_rate(; kargs...) = push!(rate_guesses, kargs)
 
-Arrh_guesses = []
-guess_Arrh(; kargs...) = push!(Arrh_guesses, kargs)
+guess_Arrh_local = []
+rate_constant_Arrh_local(; kargs...) = push!(guess_Arrh_local, kargs)
+
+guess_Arrh_global = []
+rate_constant_Arrh_global(; kargs...) = push!(guess_Arrh_global, kargs)
+
+guess_hTST_local = []
+rate_constant_hTST_local(; kargs...) = push!(guess_hTST_local, kargs)
+
+guess_hTST_global = []
+rate_constant_hTST_global(; kargs...) = push!(guess_hTST_global, kargs)
 
 guesses = []
 guess(; kargs...) = push!(guesses, kargs)
 
 par_guesses = []
 guess_par(; kargs...) = push!(par_guesses, kargs)
+
+# get step densities
 
 θs = []
 step_density(; kargs...) = push!(θs, kargs)

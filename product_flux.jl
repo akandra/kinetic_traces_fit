@@ -44,15 +44,26 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
     end
 
     # update rate constants for Arrhenius fitting parameters
-    for s in rate_constants_sfx
+    for (j,s) in enumerate(rate_constants_sfx)
         if df2fit[1,rate_constants_base*s].glbl
-            for i in 1:ndata
-                df2fit[i,rate_constants_base*s].value = 
-                    Arrhenius(df2fit[i,:temperature], df2fitpar[1,"ν"*s].value, df2fitpar[1,"ϵ"*s].value)
+            if T_function_keys[j,1] == 1
+                for i in 1:ndata
+                    df2fit[i,rate_constants_base*s].value = 
+                        Arrhenius(df2fit[i,:temperature], 
+                                  df2fitpar[1,"ν"*s].value, df2fitpar[1,"ϵ"*s].value)
+                end
+            end
+            if T_function_keys[j,1] == 2
+                for i in 1:ndata
+                    df2fit[i,rate_constants_base*s].value = 
+                        hTST(df2fit[i,:temperature], 
+                             [  df2fitpar[1,"hνR"*s*string(j)].value for j in 1:T_function_keys[j,2] ],
+                             [ df2fitpar[1,"hνTS"*s*string(j)].value for j in 1:T_function_keys[j,2]-1 ],
+                            df2fitpar[1,"ϵ"*s].value)
+                end
             end
         end
     end
-
 
     flux=Float64[]
     for (i, d) in enumerate(data)

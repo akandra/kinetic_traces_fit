@@ -12,7 +12,8 @@ using Statistics: mean
 debug = 0
 
 # important constants
-kB = 1/11604.5 # conversion from K to eV
+kB = 8.61733*10^-5 # conversion from K to eV
+hP = 4.13567*10^-9 # Planck constant in eV⋅μs
 
 # structure to deal with fitting parameters
 @with_kw mutable struct fitpar
@@ -34,7 +35,7 @@ include("get_data.jl")
 include("load_kinetic_traces.jl")
 
 # utilities
-include("Arrhenius.jl")
+include("temperature_functions.jl")
 include("ann_par.jl") # annotation for plots
 
 # initialization functions

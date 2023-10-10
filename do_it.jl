@@ -41,8 +41,10 @@ function do_it()
     set_initial_guesses!(df2fit)
     set_guess_pars!(df2fit,  par_guesses, kinetic_traces, mins, maxs, δs)
 
-    # select df2fit columns of type fitpar preserving the binding by using "!"
+    # omit rate constants with globality true 
+    # (i.e. fit, for example, ν and ϵ in the case of the Arrhenius temperature function)
     fitpar_columns = setdiff( names(df2fit, fitpar), filter(x -> df2fit[1,x].glbl,rate_constants) )
+    # select df2fit columns of type fitpar preserving the binding by using "!"
     df2fitpar = df2fit[!,fitpar_columns]
 
     # save initial guesses
