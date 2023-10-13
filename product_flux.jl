@@ -68,16 +68,18 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
     flux=Float64[]
     for (i, d) in enumerate(data)
 
-        # initialize concentrations
-        y0 = zeros(Float64,length(species))
-        # get concentration of coverage species
-        y0[ findfirst(isequal(df2fit.cov_species[i]), species) ] =  df2fit.cov0[i]
-
         # WARNING: think of something better than 200.0
         tspan = ( d[begin,1], d[end,1] + 200.0 ) #.- t0s[i]
 
         # get values for rate constants
         rates = [ df2fit[i,r].value for r in rate_constants]
+
+        # initialize concentrations
+        y0 = zeros(Float64,length(species))
+        # get concentration of coverage species
+        y0 = cov_species_eq!(Oini::Float64, rates::Vector{Float64}, θs::Float64, Tsurf::Float64)
+
+#        y0[ findfirst(isequal(df2fit.cov_species[i]), species) ] =  df2fit.cov0[i]
 
         prob = ODEProblem( (ydot,y,r,t) -> 
                             kin_model!(ydot, y, r, t, df2fit.pumppars[i], df2fit.step_density[i], df2fit.temperature[i]), 

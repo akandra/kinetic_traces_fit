@@ -26,6 +26,16 @@ hP = 4.13567*10^-9 # Planck constant in eV⋅μs
 
 end
 
+# structure to define species
+@with_kw struct adsorbate
+
+    name::String = "" # "O"
+    site::String = "" # "s", "t", "c", "g"
+    type::String = "" # "beam", "coverage", "intermediate", "product"
+    σ::Int       = 0  # occupancies
+
+end
+
 # functions logging things from input
 include("log_stuff.jl")
 
