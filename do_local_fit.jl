@@ -35,7 +35,8 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
             @time push!(fit1, 
             curve_fit( (x,p)->product_flux(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1, call_counts), 
                     xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
-                    lambda = 10,min_step_quality=1e-3, maxIter=1000))
+                    lambda = 10,min_step_quality=1e-3, maxIter=1000)
+                    )
             best_fit_pars = fit1[i].param
             println("Number of function calls: ",call_counts)
             println("Fit pars: ",fit1[i].param)

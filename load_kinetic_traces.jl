@@ -4,7 +4,9 @@ function load_kinetic_traces(df2fit, data_path)
     [ println(" ",filename) for filename in df2fit.ktfname ]
     println("")
 
-    kinetic_traces = get_data(data_path, df2fit.ktfname)
+    # kinetic_traces = get_data(data_path, df2fit.ktfname)
+    # Sort kts by time
+    kinetic_traces = [ data[sortperm(data[:, 1]), :] for data in get_data(data_path, df2fit.ktfname)]
     ndata = length(kinetic_traces)
 
     # finding maximum intensity of a signal

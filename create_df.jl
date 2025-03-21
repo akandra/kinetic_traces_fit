@@ -5,6 +5,7 @@ function create_df(data_path::String, delim::String, pump_sfx::String, cov_sfx::
     covfnames       = filter(x-> occursin(cov_sfx,x) ,datafilenames)
     kintracesfnames = filter(x->!(occursin(pump_sfx,x) || occursin(cov_sfx,x)) ,datafilenames)
 
+    #print(pumpfnames,covfnames,kintracesfnames)
     # create kinetic traces data frame
     # Warning:  after changing the storing of the tag information
     #           do not forget to make the corresponding adjustments in the following code

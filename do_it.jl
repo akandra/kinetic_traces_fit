@@ -21,6 +21,7 @@ function do_it()
 
     # load kinetic traces
     kinetic_traces, maxs, mins, δs = load_kinetic_traces(df2fit, data_path)
+    
     # get a vector of baselines for data
 
     # set data cutoffs
