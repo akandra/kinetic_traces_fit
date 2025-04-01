@@ -83,7 +83,7 @@ function product_flux(x, p::Vector{Float64}, df2fit, df2fitpar, data, ndata, flg
                             kin_model!(ydot, y, r, t, df2fit.pumppars[i], df2fit.step_density[i], df2fit.temperature[i]), 
                                 y0, tspan, rates )
         sol = solve(prob, alg_hints=[:stiff], 
-                    maxiters=100, reltol = 1e-8, abstol = 1e-8)
+                    maxiters=1000000, reltol = 1e-8, abstol = 1e-8)
  
         fpars  = [ df2fit[i,r].value for r in fit_parnames]
         append!(flux, fit_function(sol, d[:,1], df2fit.step_density[i], rates, fpars))

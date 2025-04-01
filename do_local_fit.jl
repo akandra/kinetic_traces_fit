@@ -31,47 +31,53 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                 end
             end
 
-            call_counts = [0]
-            @time push!(fit1, 
-            curve_fit( (x,p)->product_flux(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1, call_counts), 
-                    xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
-                    lambda = 10,min_step_quality=1e-3, maxIter=1000)
-                    )
-            best_fit_pars = fit1[i].param
-            println("Number of function calls: ",call_counts)
-            println("Fit pars: ",fit1[i].param)
-            println("Done fitting date #",i," of ",ndata)
-
-            # write out parameter-related data
-            mkpath(output_path)
-            open( joinpath(output_path, df2fit[i,:].ktfname), "a") do io
-                write(io, "# parameter names\n")
-                writedlm(io, hcat(names(df2fitpar)...) )
-                write(io, "# initial guess\n")
-                writedlm(io, transpose(iguess[i,:]))
-                write(io,"# best fit\n")
-                writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
-                write(io,"# standard error\n")
-                sef = try 
-                        stderror(fit1[i])
-                    catch e
-                        fill(NaN,length(fit1[i].param))
-                    end
-                se = zeros(ncol(df2fitpar))
-                j = 0
-                for d in 1:ncol(df2fitpar)
-                    if df2fitpar[i,d].var
-                        j+=1
-                        se[d] = sef[j]
-                    end
-                end
+            best_fit_pars = Float64[]
+            χ2 = 0.0
+            if length(pini1) == 0
+                println("No fitting parameters found for data set ",i,". Using initial guess.")
                 
-                writedlm(io, transpose(se))
-                write(io, "# reduced χ²\n")
-                χ2 = sum(fit1[i].resid .^ 2)/(length(fit1[i].resid) - j)
-                writedlm(io, χ2)
+            else
+                call_counts = [0]
+                @time push!(fit1, 
+                curve_fit( (x,p)->product_flux(x, p, df2fit1, df2fitpar1, [ kinetic_traces[i][1:df2fit1[1,:cutoff]] ], 1, call_counts), 
+                        xdata1, ydata1, pini1, lower=plb1, upper=pub1; 
+                        lambda = 10,min_step_quality=1e-3, maxIter=1000)
+                        )
+                best_fit_pars = fit1[i].param
+                println("Number of function calls: ",call_counts)
+                println("Fit pars: ",fit1[i].param)
+                println("Done fitting date #",i," of ",ndata)
 
-            end
+                # write out parameter-related data
+                mkpath(output_path)
+                open( joinpath(output_path, df2fit[i,:].ktfname), "a") do io
+                    write(io, "# parameter names\n")
+                    writedlm(io, hcat(names(df2fitpar)...) )
+                    write(io, "# initial guess\n")
+                    writedlm(io, transpose(iguess[i,:]))
+                    write(io,"# best fit\n")
+                    writedlm(io, transpose([ d.value for d in df2fitpar[i,:] ]))
+                    write(io,"# standard error\n")
+                    sef = try 
+                            stderror(fit1[i])
+                        catch e
+                            fill(NaN,length(fit1[i].param))
+                        end
+                    se = zeros(ncol(df2fitpar))
+                    j = 0
+                    for d in 1:ncol(df2fitpar)
+                        if df2fitpar[i,d].var
+                            j+=1
+                            se[d] = sef[j]
+                        end
+                    end
+                    writedlm(io, transpose(se))
+                    write(io, "# reduced χ²\n")
+                    χ2 = sum(fit1[i].resid .^ 2)/(length(fit1[i].resid) - j)
+                    writedlm(io, χ2)
+
+                end
+            end        
 
         elseif wtd[1] == "analysis"
 
@@ -81,7 +87,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
 
             best_fit_pars = Float64[]
             for d in names(df2fitpar)
-                if data[3][d] > 0.0
+                if data[3][d] != 0.0
                     push!(best_fit_pars, data[2][d])
                 end
             end
@@ -89,7 +95,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
             # update fit parameter structure in df2fitpar
             for p in data[2]
                 df2fitpar[i,p[1]].value = p[2]
-                df2fitpar[i,p[1]].var = data[3][p[1]] > 0.0
+                df2fitpar[i,p[1]].var = (data[3][p[1]] != 0.0)
             end
 
         elseif wtd == "clean"
@@ -117,6 +123,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
             xlabel="time (μs)", ylabel="flux (a.u.)", 
             title=tag*": "*facet*", "*tsurf*", "*rrr,
             size=(600,600),
+            ylimits=(minimum(kinetic_traces[i][:,2]),maximum(kinetic_traces[i][:,2])),
             ann=append!(
                 [((0.7,0.85-0.05*j), ann_par(rate_constants_base*"_{"*k*"}",  df2fit[:,rate_constants[j]][i])) for (j,k) in enumerate(rate_constants_sfx)],
                 [((0.7,0.84-0.05*size(rate_constants,1)-0.05*j), ann_par(f,  df2fit[:,f][i])) for (j,f) in enumerate(fit_parnames[1:3])],
@@ -142,7 +149,7 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
         else
             plot_template = plot(framestyle=:box, xlabel="1000/T (1/K)", ylabel="log(rate/μs)")
         end
-        plots = [ deepcopy(plot_template) for i in 1:length(crit_list)]
+        plot_dict = Dict()
 
         for (i,dfg) in enumerate(df_grouped)
 
@@ -229,24 +236,27 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
 
                 plot_title = "\$"*rate_constants_base*"_{"*sfx*"}(T)\$"*subtitle
                 iplot = crit_dict[dfg[1,wtd[2]]]
+                if get(plot_dict, sfx, 0) == 0 
+                    plot_dict[sfx] = deepcopy(plot_template)
+                end
 
                 legend_label = [""]
                 for f in wtd[3:end]
                     legend_label[1] = legend_label[1]*string(dfg[1,f])*" "
                 end
 
-                scatter!(plots[iplot], Tinv[j],rlog[j], color=color_list[ic], 
+                scatter!(plot_dict[sfx], Tinv[j],rlog[j], color=color_list[ic], 
                         title = plot_title, label=legend_label[1])
 
                 ϵ = "ϵ" .* rate_constants_sfx
                 #ygfit = log(dfgpar[1,ν].value) .- dfgpar[1,ϵ].value*11604.5*Tinv[j]
                 ylfit = fitArrh[j].param[1] .- fitArrh[j].param[2]*Tinv[j]
 
-                plot!(plots[iplot], Tinv[j], [ylfit],# ygfit], 
+                plot!(plot_dict[sfx] , Tinv[j], [ylfit],# ygfit], 
                     title = plot_title, label=["local fit" "global fit"], color=color_list[ic],
                     line=[:solid :dash],
                     ann=[(
-                        (0.05,0.6 - (plots[iplot].n - 1)*0.05), 
+                        (0.05,0.6 - (plot_dict[sfx].n - 1)*0.05), 
                         text("\$E_a^{(\\ell)}="
                         *string(round(fitArrh[j].param[2]*8.61733326e-5,sigdigits=3))
                         *"\\, \\textrm{eV},\$"*" \$\\nu^{(\\ell)}="
@@ -266,8 +276,8 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
 
         end
 
-        for p in plots
-            display(p)
+        for kv in sort(collect(keys(plot_dict)))
+            display(plot_dict[kv])
         end
         #savefig(plots[1],"test.png")
     end
