@@ -220,12 +220,27 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                 end
             end
 
+            # Trick code to believe it's in the global fit mode
+
             # set wtd to "fit"
             wtd[1] = "fit"
+            # set glbl to true and Arrhenius T_function_key for all variable rate constants in dfg
+            for (i,sfx) in enumerate(rate_constants_sfx)
+                if sfx in k_sfxs
+                    dfg[1,rate_constants_base*sfx].glbl = true
+                    T_function_keys[i,1] = 1
+                end
+            end    
             # get global fit for the group dfg
             do_global_fit(dfg, dfgpar, kinetic_traces[kt_idx], iguessg)
-            # set wtd to "fit"
+            # back to normal mode
             wtd[1] = "analysis"
+            for (i,sfx) in enumerate(rate_constants_sfx)
+                if sfx in k_sfxs
+                    dfg[1,rate_constants_base*sfx].glbl = false
+                    T_function_keys[i,1] = 0
+                end
+            end    
  
             # plotting arrheniusly
 
@@ -248,11 +263,12 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                 scatter!(plot_dict[sfx], Tinv[j],rlog[j], color=color_list[ic], 
                         title = plot_title, label=legend_label[1])
 
-                ϵ = "ϵ" .* rate_constants_sfx
-                #ygfit = log(dfgpar[1,ν].value) .- dfgpar[1,ϵ].value*11604.5*Tinv[j]
+                ν = "ν" .* sfx
+                ϵ = "ϵ" .* sfx
+                ygfit = log(dfgpar[1,ν].value) .- dfgpar[1,ϵ].value*11604.5*Tinv[j]
                 ylfit = fitArrh[j].param[1] .- fitArrh[j].param[2]*Tinv[j]
 
-                plot!(plot_dict[sfx] , Tinv[j], [ylfit],# ygfit], 
+                plot!(plot_dict[sfx] , Tinv[j], [ylfit], #[ygfit], 
                     title = plot_title, label=["local fit" "global fit"], color=color_list[ic],
                     line=[:solid :dash],
                     ann=[(
@@ -261,21 +277,21 @@ function do_local_fit(df2fit::DataFrame, df2fitpar::DataFrame,
                         *string(round(fitArrh[j].param[2]*8.61733326e-5,sigdigits=3))
                         *"\\, \\textrm{eV},\$"*" \$\\nu^{(\\ell)}="
                         *string(round(1e6*exp(fitArrh[j].param[1]),sigdigits=2))*"\\, / \\textrm{s}\$", 
-                        color=color_list[ic], :8,:left))#,
+                        color=color_list[ic], :8,:left)),
 
-                        # ( (0.05,0.6 - (plots[iplot].n - 1)*0.05 - 0.07), 
-                        # text("\$E_a^{(g)}="
-                        # *string(round(dfgpar[1,ϵ].value,sigdigits=3))
-                        # *"\\, \\textrm{eV},\$"*" \$\\nu^{(g)}="
-                        # *string(round(1e6*dfgpar[1,ν].value,sigdigits=2))*"\\, / \\textrm{s}\$", 
-                        # color=color_list[ic], :8,:left) )
+                        ( (0.05,0.6 - (plot_dict[sfx].n - 1)*0.05 - 0.07), 
+                        text("\$E_a^{(g)}="
+                        *string(round(dfgpar[1,ϵ].value,sigdigits=3))
+                        *"\\, \\textrm{eV},\$"*" \$\\nu^{(g)}="
+                        *string(round(1e6*dfgpar[1,ν].value,sigdigits=2))*"\\, / \\textrm{s}\$", 
+                        color=color_list[ic], :8,:left) )
                         ] 
                 )
 
             end
 
         end
-
+println(sort(collect(keys(plot_dict))))
         for kv in sort(collect(keys(plot_dict)))
             display(plot_dict[kv])
         end

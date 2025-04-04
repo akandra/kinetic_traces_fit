@@ -21,8 +21,6 @@ wtd::Tuple{String} tells what to do: (action, selectors, ...)
 """
 function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
 
-    set_T_function_keys()
-
     # number of data sets
     ndata = nrow(df2fit)
 
@@ -48,15 +46,15 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
                 end
             end
         end
-
         call_counts = [0]
         @time fit = curve_fit( (x,p)->product_flux(x, p, df2fit, df2fitpar, kinetic_traces, ndata, call_counts), 
                         xdata, ydata, pini, lower=plb, upper=pub; 
-                        maxIter=1000, show_trace = false)
+                        #lambda = 1, min_step_quality=1e-3, maxIter=1000,
+                        show_trace=true)
         best_fit_pars = fit.param
 
         println(" It took ", call_counts[1], " function calls.")
-#        println("Fit pars: ",fit.param)
+        println("Fit pars: ",fit.param)
 
         # save the parameter-related data to a file
         mkpath(output_path)
@@ -184,24 +182,3 @@ function do_global_fit(df2fit, df2fitpar, kinetic_traces, iguess)
 
 end
 
-# set the temperature function keys
-function set_T_function_keys()
-
-    global T_function_keys = zeros(Int,length(rate_constants),2)
-
-    for (i,r) in enumerate(rate_constants_sfx)
-        
-        if r in [ v[:sfx]  for v in guess_Arrh_global ]
-            T_function_keys[i,1] = 1
-        end
-
-        for v in guess_hTST_global 
-            if r == v[:sfx]
-                T_function_keys[i,1] = 2
-                T_function_keys[i,2] = length(v[:hνR])
-            end
-        end
-    
-    end    
-
-end

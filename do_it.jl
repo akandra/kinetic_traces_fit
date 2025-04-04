@@ -56,6 +56,8 @@ function do_it()
         end
     end
 
+    set_T_function_keys()
+
     # if any parameter is global then do a fit to all the data simultaneously
     # dataset 1 is chosen, since all .glbl's are the same
 
